@@ -3,7 +3,7 @@ import { StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const Content = ({ children }: any) => {
-    return <SafeAreaView style={[styles.container]}>{children}</SafeAreaView>;
+    return <SafeAreaView style={styles.container}>{children}</SafeAreaView>;
 };
 
 const styles = StyleSheet.create({
@@ -11,6 +11,7 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingHorizontal: 20, // Approximate conversion of TailwindCSS px-5
         paddingVertical: 12, // Approximate conversion of TailwindCSS py-3
+        backgroundColor: "transparent", // Ensure background is transparent for gradient to show
     },
 });
 

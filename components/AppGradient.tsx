@@ -11,10 +11,16 @@ const AppGradient = ({
     colors: string[];
 }) => {
     return (
-        <LinearGradient colors={colors} className="flex-1">
+        <LinearGradient colors={colors} style={styles.gradient}>
             <Content>{children}</Content>
         </LinearGradient>
     );
 };
+
+const styles = StyleSheet.create({
+    gradient: {
+        flex: 1,
+    },
+});
 
 export default AppGradient;
