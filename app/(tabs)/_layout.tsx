@@ -2,6 +2,7 @@ import { Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import Colors from "@/constants/Colors";
 import React from "react";
+import { useColorScheme } from "react-native";
 
 export const unstable_settings = {
     // Ensure that reloading on `/modal` keeps a back button present.
@@ -9,18 +10,19 @@ export const unstable_settings = {
 };
 
 const Page = () => {
+    const theme = useColorScheme() ?? 'light';
+
     return (
         <Tabs
             screenOptions={{
                 headerShown: false,
-                tabBarActiveTintColor: Colors.primary,
+                tabBarActiveTintColor: Colors[theme].primary, // Use theme-based primary color
                 tabBarStyle: {
                     backgroundColor: '#f4f4f4',
                     borderTopWidth: 0,
                 },
             }}
         >
-            {/* Move the Home tab to the first position */}
             <Tabs.Screen
                 name="homePage"
                 options={{
@@ -43,9 +45,6 @@ const Page = () => {
                     ),
                 }}
             />
-
-
-
             <Tabs.Screen
                 name="profile"
                 options={{
@@ -55,9 +54,7 @@ const Page = () => {
                     ),
                 }}
             />
-        
         </Tabs>
-
     );
 };
 
