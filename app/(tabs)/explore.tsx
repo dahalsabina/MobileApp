@@ -4,9 +4,7 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   useDerivedValue,
-  runOnJS,
 } from 'react-native-reanimated';
-
 
 // Define types for Boid properties
 type Position = {
@@ -24,12 +22,12 @@ type BoidProps = {
     id: number;
     position: Position;
     velocity: Velocity;
+    color: string; // Add color property
   };
 };
 
 // Boid component representing one bird
 const Boid: React.FC<BoidProps> = ({ boid }) => {
-  // Animated style for movement
   const animatedStyle = useAnimatedStyle(() => {
     return {
       transform: [
@@ -39,19 +37,16 @@ const Boid: React.FC<BoidProps> = ({ boid }) => {
     };
   });
 
-  return <Animated.View style={[styles.boid, animatedStyle]} />;
+  return <Animated.View style={[styles.boid, animatedStyle, { backgroundColor: boid.color }]} />;
 };
 
 // BoidsSimulation Component
-
-// Main component to display multiple boids
 const BoidsSimulation: React.FC = () => {
   const numberOfBoids = 20;
+  const colors = ['#ff6b6b', '#ff9f43', '#1dd1a1', '#48dbfb', '#5f27cd']; // Array of colors
 
-  // Stores each boid with a unique id, position, and velocity
-  const boids: Array<{ id: number; position: Position; velocity: Velocity }> = [];
+  const boids: Array<{ id: number; position: Position; velocity: Velocity; color: string }> = [];
 
-  // Initialize boids with position and velocity
   for (let i = 0; i < numberOfBoids; i++) {
     const position: Position = {
       x: useSharedValue(Math.random() * 300),
@@ -63,17 +58,16 @@ const BoidsSimulation: React.FC = () => {
       y: useSharedValue(Math.random() * 4 - 2),
     };
 
-    boids.push({ id: i, position, velocity });
+    const color = colors[i % colors.length]; // Assign a color to each boid
+
+    boids.push({ id: i, position, velocity, color });
   }
 
-  // Update boids positions and velocities
   boids.forEach((boid) => {
     useDerivedValue(() => {
-      // Initialize acceleration
       let accelerationX = 0;
       let accelerationY = 0;
 
-      // Boids algorithm parameters
       const neighborDist = 100;
       const separationDist = 25;
       let total = 0;
@@ -84,7 +78,6 @@ const BoidsSimulation: React.FC = () => {
       let separationX = 0;
       let separationY = 0;
 
-      // Loop through all boids to apply rules
       boids.forEach((otherBoid) => {
         if (boid.id !== otherBoid.id) {
           const dx = otherBoid.position.x.value - boid.position.x.value;
@@ -92,17 +85,13 @@ const BoidsSimulation: React.FC = () => {
           const distance = Math.hypot(dx, dy);
 
           if (distance < neighborDist) {
-            // Alignment
             avgVelocityX += otherBoid.velocity.x.value;
             avgVelocityY += otherBoid.velocity.y.value;
-
-            // Cohesion
             avgPositionX += otherBoid.position.x.value;
             avgPositionY += otherBoid.position.y.value;
 
             total++;
 
-            // Separation
             if (distance < separationDist) {
               separationX -= dx;
               separationY -= dy;
@@ -112,28 +101,23 @@ const BoidsSimulation: React.FC = () => {
       });
 
       if (total > 0) {
-        // Alignment
         avgVelocityX /= total;
         avgVelocityY /= total;
         boid.velocity.x.value += (avgVelocityX - boid.velocity.x.value) * 0.05;
         boid.velocity.y.value += (avgVelocityY - boid.velocity.y.value) * 0.05;
 
-        // Cohesion
         avgPositionX /= total;
         avgPositionY /= total;
         boid.velocity.x.value += (avgPositionX - boid.position.x.value) * 0.005;
         boid.velocity.y.value += (avgPositionY - boid.position.y.value) * 0.005;
 
-        // Separation
         boid.velocity.x.value += separationX * 0.05;
         boid.velocity.y.value += separationY * 0.05;
       }
 
-      // Update positions based on velocities
       boid.position.x.value += boid.velocity.x.value;
       boid.position.y.value += boid.velocity.y.value;
 
-      // Boundary conditions
       if (boid.position.x.value < 0 || boid.position.x.value > 300) {
         boid.velocity.x.value *= -1;
       }
@@ -141,9 +125,8 @@ const BoidsSimulation: React.FC = () => {
         boid.velocity.y.value *= -1;
       }
 
-      // Limit speed
       const speed = Math.hypot(boid.velocity.x.value, boid.velocity.y.value);
-      const maxSpeed = 4;
+      const maxSpeed = 3;
       if (speed > maxSpeed) {
         boid.velocity.x.value = (boid.velocity.x.value / speed) * maxSpeed;
         boid.velocity.y.value = (boid.velocity.y.value / speed) * maxSpeed;
@@ -164,12 +147,11 @@ const BoidsSimulation: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#0e0b16', // Dark background for contrast
   },
   boid: {
     width: 10,
     height: 10,
-    backgroundColor: 'red',
     position: 'absolute',
     borderRadius: 5,
   },
