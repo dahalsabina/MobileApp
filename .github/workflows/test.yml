@@ -27,6 +27,11 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      # Step 4: Run tests with coverage
+      # Step 4: List files (for debugging purposes)
+      - name: List files in the repository
+        run: ls -R
+        # This command will list all files and directories in the root directory, helping confirm that `App.test.tsx` is present
+
+      # Step 5: Run tests with coverage
       - name: Run tests with coverage
         run: npm test -- --coverage
