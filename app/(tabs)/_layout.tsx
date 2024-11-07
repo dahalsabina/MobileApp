@@ -54,6 +54,17 @@ const Page = () => {
                     ),
                 }}
             />
+
+
+           <Tabs.Screen
+                name="notification"
+                options={{
+                    tabBarLabel: "Notification",
+                    tabBarIcon: ({ color }) => (
+                        <Entypo name="bell" size={24} color={color} />
+                    ),
+                }}
+            />
         </Tabs>
     );
 };
