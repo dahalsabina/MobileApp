@@ -1,3 +1,4 @@
+
 name: Test and Publish to Expo
 
 on:
@@ -31,7 +32,6 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
-
       # Step 4: Install dependencies
       - name: Install dependencies
         run: npm install
@@ -39,7 +39,7 @@ jobs:
       # Step 5: List files (for debugging purposes)
       - name: List files in the repository
         run: ls -R
-        # This command lists all files and directories in the repository, helping confirm that `App.test.tsx` is present
+        # This command lists all files and directories in the repository, helping confirm that App.test.tsx is present
 
       # Step 6: Print Jest configuration (optional for debugging)
       - name: Print Jest configuration
@@ -50,6 +50,12 @@ jobs:
         run: |
           CI=true npm run test:ci
         shell: /usr/bin/bash -e {0}
+
+      
+
+      
+
+
 
 
 
