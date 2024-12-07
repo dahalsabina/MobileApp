@@ -1,21 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1733610986293" clover="3.2.0">
-  <project timestamp="1733610986293" name="All files">
-    <metrics statements="313" coveredstatements="4" conditionals="84" coveredconditionals="0" methods="63" coveredmethods="1" elements="460" coveredelements="5" complexity="0" loc="313" ncloc="313" packages="7" files="21" classes="21"/>
-    <package name="ReactNativeMobile ">
-      <metrics statements="1" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
-      <file name="app.d.ts" path="/Users/dahalsabina/Desktop/ReactNativeMobile /app.d.ts">
-        <metrics statements="0" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
-      </file>
-      <file name="declarations.d.ts" path="/Users/dahalsabina/Desktop/ReactNativeMobile /declarations.d.ts">
-        <metrics statements="0" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
-      </file>
-      <file name="tailwind.config.js" path="/Users/dahalsabina/Desktop/ReactNativeMobile /tailwind.config.js">
-        <metrics statements="1" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
-        <line num="2" count="0" type="stmt"/>
-      </file>
-    </package>
-    <package name="ReactNativeMobile .app">
+<coverage generated="1733611583303" clover="3.2.0">
+  <project timestamp="1733611583303" name="All files">
+    <metrics statements="271" coveredstatements="4" conditionals="70" coveredconditionals="0" methods="54" coveredmethods="1" elements="395" coveredelements="5" complexity="0" loc="271" ncloc="271" packages="2" files="9" classes="9"/>
+    <package name="app">
       <metrics statements="36" coveredstatements="4" conditionals="8" coveredconditionals="0" methods="9" coveredmethods="1"/>
       <file name="[id].tsx" path="/Users/dahalsabina/Desktop/ReactNativeMobile /app/[id].tsx">
         <metrics statements="30" coveredstatements="0" conditionals="8" coveredconditionals="0" methods="6" coveredmethods="0"/>
@@ -63,7 +50,7 @@
         <line num="51" count="1" type="stmt"/>
       </file>
     </package>
-    <package name="ReactNativeMobile .app.(tabs)">
+    <package name="app.(tabs)">
       <metrics statements="235" coveredstatements="0" conditionals="62" coveredconditionals="0" methods="45" coveredmethods="0"/>
       <file name="_layout.tsx" path="/Users/dahalsabina/Desktop/ReactNativeMobile /app/(tabs)/_layout.tsx">
         <metrics statements="7" coveredstatements="0" conditionals="2" coveredconditionals="0" methods="6" coveredmethods="0"/>
@@ -317,86 +304,6 @@
         <line num="4" count="0" type="stmt"/>
         <line num="5" count="0" type="stmt"/>
         <line num="34" count="0" type="stmt"/>
-      </file>
-    </package>
-    <package name="ReactNativeMobile .components">
-      <metrics statements="8" coveredstatements="0" conditionals="2" coveredconditionals="0" methods="3" coveredmethods="0"/>
-      <file name="AppGradient.tsx" path="/Users/dahalsabina/Desktop/ReactNativeMobile /components/AppGradient.tsx">
-        <metrics statements="3" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="0"/>
-        <line num="6" count="0" type="stmt"/>
-        <line num="13" count="0" type="stmt"/>
-        <line num="20" count="0" type="stmt"/>
-      </file>
-      <file name="Content.tsx" path="/Users/dahalsabina/Desktop/ReactNativeMobile /components/Content.tsx">
-        <metrics statements="3" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="0"/>
-        <line num="5" count="0" type="stmt"/>
-        <line num="6" count="0" type="stmt"/>
-        <line num="9" count="0" type="stmt"/>
-      </file>
-      <file name="CustomButton.tsx" path="/Users/dahalsabina/Desktop/ReactNativeMobile /components/CustomButton.tsx">
-        <metrics statements="2" coveredstatements="0" conditionals="2" coveredconditionals="0" methods="1" coveredmethods="0"/>
-        <line num="11" count="0" type="stmt"/>
-        <line num="17" count="0" type="stmt"/>
-      </file>
-    </package>
-    <package name="ReactNativeMobile .constants">
-      <metrics statements="1" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
-      <file name="Colors.ts" path="/Users/dahalsabina/Desktop/ReactNativeMobile /constants/Colors.ts">
-        <metrics statements="1" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
-        <line num="6" count="0" type="stmt"/>
-      </file>
-      <file name="project_images.ts" path="/Users/dahalsabina/Desktop/ReactNativeMobile /constants/project_images.ts">
-        <metrics statements="0" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
-      </file>
-    </package>
-    <package name="ReactNativeMobile .hooks">
-      <metrics statements="6" coveredstatements="0" conditionals="4" coveredconditionals="0" methods="2" coveredmethods="0"/>
-      <file name="useColorScheme.ts" path="/Users/dahalsabina/Desktop/ReactNativeMobile /hooks/useColorScheme.ts">
-        <metrics statements="0" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
-      </file>
-      <file name="useColorScheme.web.ts" path="/Users/dahalsabina/Desktop/ReactNativeMobile /hooks/useColorScheme.web.ts">
-        <metrics statements="1" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="0"/>
-        <line num="7" count="0" type="stmt"/>
-      </file>
-      <file name="useThemeColor.ts" path="/Users/dahalsabina/Desktop/ReactNativeMobile /hooks/useThemeColor.ts">
-        <metrics statements="5" coveredstatements="0" conditionals="4" coveredconditionals="0" methods="1" coveredmethods="0"/>
-        <line num="13" count="0" type="cond" truecount="0" falsecount="2"/>
-        <line num="14" count="0" type="stmt"/>
-        <line num="16" count="0" type="cond" truecount="0" falsecount="2"/>
-        <line num="17" count="0" type="stmt"/>
-        <line num="19" count="0" type="stmt"/>
-      </file>
-    </package>
-    <package name="ReactNativeMobile .scripts">
-      <metrics statements="26" coveredstatements="0" conditionals="8" coveredconditionals="0" methods="4" coveredmethods="0"/>
-      <file name="reset-project.js" path="/Users/dahalsabina/Desktop/ReactNativeMobile /scripts/reset-project.js">
-        <metrics statements="26" coveredstatements="0" conditionals="8" coveredconditionals="0" methods="4" coveredmethods="0"/>
-        <line num="9" count="0" type="stmt"/>
-        <line num="10" count="0" type="stmt"/>
-        <line num="12" count="0" type="stmt"/>
-        <line num="13" count="0" type="stmt"/>
-        <line num="14" count="0" type="stmt"/>
-        <line num="15" count="0" type="stmt"/>
-        <line num="17" count="0" type="stmt"/>
-        <line num="34" count="0" type="stmt"/>
-        <line num="45" count="0" type="stmt"/>
-        <line num="46" count="0" type="cond" truecount="0" falsecount="2"/>
-        <line num="47" count="0" type="stmt"/>
-        <line num="49" count="0" type="stmt"/>
-        <line num="51" count="0" type="stmt"/>
-        <line num="52" count="0" type="cond" truecount="0" falsecount="2"/>
-        <line num="53" count="0" type="stmt"/>
-        <line num="55" count="0" type="stmt"/>
-        <line num="57" count="0" type="stmt"/>
-        <line num="58" count="0" type="stmt"/>
-        <line num="59" count="0" type="cond" truecount="0" falsecount="2"/>
-        <line num="60" count="0" type="stmt"/>
-        <line num="62" count="0" type="stmt"/>
-        <line num="64" count="0" type="stmt"/>
-        <line num="65" count="0" type="stmt"/>
-        <line num="66" count="0" type="cond" truecount="0" falsecount="2"/>
-        <line num="67" count="0" type="stmt"/>
-        <line num="69" count="0" type="stmt"/>
       </file>
     </package>
   </project>
