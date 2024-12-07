@@ -93,14 +93,7 @@ jobs:
           echo "| Branches    | ${BRANCHES}%  |" >> $GITHUB_STEP_SUMMARY
           echo "| Statements  | ${STATEMENTS}% |" >> $GITHUB_STEP_SUMMARY
 
-      
-      
-
-
-      
-
-      
-
+     
 
 
 

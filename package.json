@@ -14,13 +14,16 @@
   },
   "jest": {
     "preset": "jest-expo",
-    "collectCoverage": true,
-    "collectCoverageFrom": [
-      "**/*.{ts,tsx,js,jsx}",
-      "!**/coverage/**",
-      "!**/node_modules/**",
-      "!**/babel.config.js",
-      "!**/.expo/**"
+  "collectCoverage": true,
+  "coverageDirectory": "coverage",
+  "coverageReporters": ["json", "lcov", "text", "clover"],
+  "collectCoverageFrom": [
+    "**/*.{ts,tsx,js,jsx}",
+    "!**/coverage/**",
+    "!**/node_modules/**",
+    "!**/babel.config.js",
+    "!**/expo-env.d.ts",
+    "!**/.expo/**"
     ],
     "testMatch": [
       "<rootDir>/__tests__/App.test.tsx"
