@@ -16,7 +16,7 @@
     "preset": "jest-expo",
     "collectCoverage": true,
     "collectCoverageFrom": [
-      "**/*.{ts,tsx,jsx}",
+      "**/*.{tsx,jsx}",
       "!**/coverage/**",
       "!**/node_modules/**"
      

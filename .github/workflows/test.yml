@@ -34,6 +34,33 @@ jobs:
         run: |
           CI=true npm run test:ci
 
+      # Step 5: Extract and display coverage summary
+      - name: Display Coverage Summary
+        run: |
+          # Ensure jq is available
+          if ! command -v jq &> /dev/null
+          then
+              sudo apt-get update
+              sudo apt-get install -y jq
+          fi
+
+          # Extract coverage percentages
+          LINES=$(jq '.total.lines.pct' coverage/coverage-summary.json)
+          FUNCTIONS=$(jq '.total.functions.pct' coverage/coverage-summary.json)
+          BRANCHES=$(jq '.total.branches.pct' coverage/coverage-summary.json)
+          STATEMENTS=$(jq '.total.statements.pct' coverage/coverage-summary.json)
+
+          # Append to GitHub Actions summary
+          echo "## 🧪 Test Coverage Summary" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric      | Coverage |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------------|----------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Lines       | ${LINES}%   |" >> $GITHUB_STEP_SUMMARY
+          echo "| Functions   | ${FUNCTIONS}% |" >> $GITHUB_STEP_SUMMARY
+          echo "| Branches    | ${BRANCHES}%  |" >> $GITHUB_STEP_SUMMARY
+          echo "| Statements  | ${STATEMENTS}% |" >> $GITHUB_STEP_SUMMARY
+
+      
+
 
       
 
