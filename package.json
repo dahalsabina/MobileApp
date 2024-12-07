@@ -16,11 +16,11 @@
     "preset": "jest-expo",
     "collectCoverage": true,
     "collectCoverageFrom": [
-      "**/*.{tsx,jsx}",
+      "**/*.{ts,tsx,js,jsx}",
       "!**/coverage/**",
-      "!**/node_modules/**"
-     
-    
+      "!**/node_modules/**",
+      "!**/babel.config.js",
+      "!**/.expo/**"
     ],
     "testMatch": [
       "<rootDir>/__tests__/App.test.tsx"
