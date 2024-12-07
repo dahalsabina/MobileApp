@@ -9,6 +9,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "test": "jest --watchAll",
+    "test:ci": "jest --coverage",
     "lint": "expo lint"
   },
   "jest": {
@@ -25,10 +26,7 @@
     "testMatch": [
       "<rootDir>/__tests__/App.test.tsx"
     ]
-  }
-  
-  ,
-  
+  },
   "dependencies": {
     "@expo/vector-icons": "^14.0.2",
     "@react-navigation/native": "^6.0.2",
@@ -70,3 +68,4 @@
   },
   "private": true
 }
+

@@ -48,8 +48,9 @@ jobs:
       # Step 7: Run tests with coverage
       - name: Run tests with coverage
         run: |
-          CI=true npm test -- --coverage
+          CI=true npm run test:ci
         shell: /usr/bin/bash -e {0}
+
 
 
 
