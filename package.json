@@ -16,10 +16,10 @@
     "preset": "jest-expo",
     "collectCoverage": true,
     "collectCoverageFrom": [
-      "**/*.{tsx}",
+      "**/*.{ts,tsx,js,jsx}",
       "!**/coverage/**",
       "!**/node_modules/**"
-    
+     
     
     ],
     "testMatch": [
