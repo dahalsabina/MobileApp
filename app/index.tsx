@@ -3,18 +3,6 @@ import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from "expo-router";
 
-/**
- * The main application component that renders a welcome screen with images,
- * text, and a "Get Started" button.
- *
- * - Contains three primary sections: a top image (parachute icon), a middle
- *   image (world map illustration), and a text section with a welcome message.
- * - Provides a "Get Started" button that navigates the user to the home page.
- *
- * @component
- * @example
- * return <App />;
- */
 const App = () => {
   const router = useRouter();
 
@@ -22,24 +10,29 @@ const App = () => {
     <SafeAreaView style={styles.container}>
       {/* Top Section: Parachute Icon */}
       <View style={styles.parachuteContainer}>
-        <Image source={require('@/assets/project_images/image1.png')} style={styles.parachuteIcon} />
+        <Image
+          source={require('@/assets/project_images/image1.png')}
+          style={styles.parachuteIcon}
+        />
       </View>
 
       {/* Middle Section: World Map Illustration */}
       <View style={styles.worldMapContainer}>
-        <Image source={require('@/assets/project_images/image2.png')} style={styles.worldMapIcon} />
+        <Image
+          source={require('@/assets/project_images/image2.png')}
+          style={styles.worldMapIcon}
+        />
       </View>
 
       {/* Text Section */}
       <View style={styles.textContainer}>
         <Text style={styles.titleText}>
-          Curious about {"\n"}what’s happening around the world?
+          Explore the World {"\n"}Like Never Before
         </Text>
         <Text style={styles.subtitleText}>
-          Lorem ipsum dolor sit amet consectetur. {"\n"}
-          Adipiscing in tristique mattis sed sed. {"\n"}
-          Lorem ipsum dolor sit amet consectetur. {"\n"}
-          Adipiscing in tristique mattis sed sed.
+          Discover stories, insights, and events {"\n"}
+          happening across the globe. Let curiosity {"\n"}
+          guide you to a world of endless possibilities.
         </Text>
       </View>
 
@@ -47,7 +40,7 @@ const App = () => {
       <TouchableOpacity
         onPress={() => router.push("/homePage")}
         style={styles.button}
-        activeOpacity={0.7}
+        activeOpacity={0.8}
       >
         <Text style={styles.buttonText}>Get Started</Text>
       </TouchableOpacity>
@@ -58,54 +51,64 @@ const App = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f4f4f4', 
+    backgroundColor: '#eef2f3',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 16,
+    justifyContent: 'space-around',
+    padding: 20,
   },
   parachuteContainer: {
-    marginTop: 50,
+    marginTop: 40,
   },
   parachuteIcon: {
-    width: 120,
-    height: 120,
+    width: 100,
+    height: 100,
+    resizeMode: 'contain',
   },
   worldMapContainer: {
-    marginVertical: 20,
+    marginVertical: 30,
   },
   worldMapIcon: {
-    width: 150,
-    height: 150,
+    width: 200,
+    height: 200,
+    resizeMode: 'contain',
   },
   textContainer: {
     alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 25,
+    marginVertical: 20,
   },
   titleText: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 24,
+    fontWeight: '700',
     textAlign: 'center',
-    color: '#333',
+    color: '#2c3e50',
+    marginBottom: 10,
   },
   subtitleText: {
-    fontSize: 14,
+    fontSize: 16,
+    lineHeight: 24,
     textAlign: 'center',
-    color: '#666',
-    marginTop: 10,
+    color: '#7f8c8d',
   },
   button: {
-    backgroundColor: '#38b2ac', 
-    paddingVertical: 16,        
-    paddingHorizontal: 32,      
-    borderRadius: 12,           
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: '#38b2ac', // Original button color retained
+    paddingVertical: 14,
+    paddingHorizontal: 40,
+    borderRadius: 25,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
   },
   buttonText: {
-    color: '#ffffff',           
-    fontWeight: 'bold',         
-    fontSize: 18,               
+    color: '#ffffff',
+    fontWeight: 'bold',
+    fontSize: 18,
+    textTransform: 'uppercase',
   },
 });
 
 export default App;
+
+

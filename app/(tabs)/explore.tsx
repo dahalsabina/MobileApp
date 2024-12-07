@@ -84,7 +84,7 @@ const Boid: React.FC<BoidProps> = ({ boid }) => {
 
 const BoidsSimulation: React.FC = () => {
   const SERVER_URL =
-    'https://senior-project-backend-django.onrender.com/boids-service/simulation_boids/';
+    'https://senior-project-backend-django.onrender.com/boids-service/db_boids/';
   const [boids, setBoids] = useState<BoidType[]>([]);
 
   // Function to limit a vector's magnitude

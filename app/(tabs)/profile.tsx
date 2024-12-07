@@ -6,7 +6,7 @@ const Profile = () => {
     <View style={styles.container}>
       {/* Profile Picture */}
       <Image
-        source={{ uri: 'https://via.placeholder.com/120' }} // Replace with user's profile image URL
+        source={{ uri: 'https://via.placeholder.com/120' }} 
         style={styles.profileImage}
       />
 

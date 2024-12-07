@@ -1,16 +1,11 @@
-import { Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
+import { AntDesign, Entypo, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import Colors from "@/constants/Colors";
 import React from "react";
 import { useColorScheme } from "react-native";
 
-export const unstable_settings = {
-    // Ensure that reloading on `/modal` keeps a back button present.
-    initialRouteName: "(tabs)",
-};
-
-const Page = () => {
-    const theme = useColorScheme() ?? 'light';
+export default function Page() {
+    const theme = useColorScheme() ?? "light";
 
     return (
         <Tabs
@@ -18,21 +13,18 @@ const Page = () => {
                 headerShown: false,
                 tabBarActiveTintColor: Colors[theme].primary, // Use theme-based primary color
                 tabBarStyle: {
-                    backgroundColor: '#f4f4f4',
+                    backgroundColor: "#f4f4f4",
                     borderTopWidth: 0,
                 },
             }}
         >
+            {/* Explicitly include only the desired routes */}
             <Tabs.Screen
                 name="homePage"
                 options={{
                     tabBarLabel: "Home",
                     tabBarIcon: ({ color }) => (
-                        <MaterialCommunityIcons
-                            name="flower-tulip"
-                            size={24}
-                            color={color}
-                        />
+                        <Ionicons name="home" size={24} color="#777" />
                     ),
                 }}
             />
@@ -46,6 +38,19 @@ const Page = () => {
                 }}
             />
             <Tabs.Screen
+                name="discussionPost"
+                options={{
+                    tabBarLabel: "",
+                    tabBarIcon: ({ color }) => (
+                        <AntDesign name="pluscircle" size={24} color={color} />
+                    ),
+                }}
+            />
+
+
+
+
+            <Tabs.Screen
                 name="profile"
                 options={{
                     tabBarLabel: "Profile",
@@ -54,9 +59,7 @@ const Page = () => {
                     ),
                 }}
             />
-
-
-           <Tabs.Screen
+            <Tabs.Screen
                 name="notification"
                 options={{
                     tabBarLabel: "Notification",
@@ -65,8 +68,8 @@ const Page = () => {
                     ),
                 }}
             />
+
+            
         </Tabs>
     );
-};
-
-export default Page;
+}
