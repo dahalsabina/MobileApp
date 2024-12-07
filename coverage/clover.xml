@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1733597745618" clover="3.2.0">
-  <project timestamp="1733597745618" name="All files">
+<coverage generated="1733610986293" clover="3.2.0">
+  <project timestamp="1733610986293" name="All files">
     <metrics statements="313" coveredstatements="4" conditionals="84" coveredconditionals="0" methods="63" coveredmethods="1" elements="460" coveredelements="5" complexity="0" loc="313" ncloc="313" packages="7" files="21" classes="21"/>
     <package name="ReactNativeMobile ">
       <metrics statements="1" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>

@@ -34,66 +34,11 @@ jobs:
         run: |
           CI=true npm run test:ci
 
-      # Step 5: List Coverage Directory
-      - name: List Coverage Directory
-        run: |
-          echo "Listing coverage directory contents:"
-          ls -la coverage/
 
-      # Step 6: Display Coverage Summary Content
-      - name: Display Coverage Summary Content
-        run: |
-          echo "Displaying coverage-summary.json content:"
-          cat coverage/coverage-summary.json
+      
 
-      # Step 7: Install jq
-      - name: Install jq
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y jq
+      
 
-      # Step 8: Verify jq installation (Optional)
-      - name: Verify jq installation
-        run: jq --version
-
-      # Step 9: Extract and display coverage summary
-      - name: Display Coverage Summary
-        run: |
-          # Detect whether 'total' or 'totals' is present
-          if jq -e '.total' coverage/coverage-summary.json > /dev/null; then
-            TOTAL_KEY="total"
-          elif jq -e '.totals' coverage/coverage-summary.json > /dev/null; then
-            TOTAL_KEY="totals"
-          else
-            echo "❌ Neither 'total' nor 'totals' key found in coverage-summary.json"
-            exit 1
-          fi
-
-          # Extract coverage percentages using jq
-          LINES=$(jq ".${TOTAL_KEY}.lines.pct" coverage/coverage-summary.json)
-          FUNCTIONS=$(jq ".${TOTAL_KEY}.functions.pct" coverage/coverage-summary.json)
-          BRANCHES=$(jq ".${TOTAL_KEY}.branches.pct" coverage/coverage-summary.json)
-          STATEMENTS=$(jq ".${TOTAL_KEY}.statements.pct" coverage/coverage-summary.json)
-
-          # Check if variables are valid numbers
-          if ! [[ "$LINES" =~ ^[0-9]+(\.[0-9]+)?$ ]] || \
-             ! [[ "$FUNCTIONS" =~ ^[0-9]+(\.[0-9]+)?$ ]] || \
-             ! [[ "$BRANCHES" =~ ^[0-9]+(\.[0-9]+)?$ ]] || \
-             ! [[ "$STATEMENTS" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
-            echo "❌ Failed to extract valid coverage metrics."
-            exit 1
-          fi
-
-          # Append coverage summary to GitHub Actions summary
-          echo "## 🧪 Test Coverage Summary" >> $GITHUB_STEP_SUMMARY
-          echo "| Metric      | Coverage |" >> $GITHUB_STEP_SUMMARY
-          echo "|-------------|----------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Lines       | ${LINES}%   |" >> $GITHUB_STEP_SUMMARY
-          echo "| Functions   | ${FUNCTIONS}% |" >> $GITHUB_STEP_SUMMARY
-          echo "| Branches    | ${BRANCHES}%  |" >> $GITHUB_STEP_SUMMARY
-          echo "| Statements  | ${STATEMENTS}% |" >> $GITHUB_STEP_SUMMARY
-
-     
 
 
 
