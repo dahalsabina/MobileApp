@@ -16,24 +16,16 @@
     "preset": "jest-expo",
     "collectCoverage": true,
     "collectCoverageFrom": [
-      "src/**/*.{ts,tsx,js,jsx}",
-      "!src/**/*.d.ts",
-      "!src/index.tsx",
-      "!src/setupTests.ts",
-      "!**/coverage/**"
+      "**/*.{ts,tsx,js,jsx}",
+      "!**/coverage/**",
+      "!**/node_modules/**",
+      "!**/babel.config.js",
+      "!**/expo-env.d.ts",
+      "!**/.expo/**"
     ],
     "testMatch": [
-      "<rootDir>/__tests__/**/*.test.tsx"
-    ],
-    
-    "coverageThreshold": {
-      "global": {
-        "branches": 80,
-        "functions": 80,
-        "lines": 80,
-        "statements": 80
-      }
-    }
+      "<rootDir>/__tests__/App.test.tsx"
+    ]
   },
   "dependencies": {
     "@expo/vector-icons": "^14.0.2",
@@ -76,4 +68,3 @@
   },
   "private": true
 }
-

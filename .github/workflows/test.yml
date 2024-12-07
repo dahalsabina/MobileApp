@@ -1,4 +1,3 @@
-
 name: Test and Publish to Expo
 
 on:
@@ -11,45 +10,30 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest  # The environment to run tests (an Ubuntu VM)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15  # Adjusted based on optimized steps
 
     steps:
-      # Step 1: Check out the code from the repository
+      # Step 1: Checkout code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Set up Node.js
+      # Step 2: Set up Node.js with built-in npm caching
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16'  # Compatible version for the project
+          node-version: '16'
+          cache: 'npm'
 
-      # Step 3: Cache node modules (optional but recommended for faster builds)
-      - name: Cache node modules
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-      # Step 4: Install dependencies
+      # Step 3: Install dependencies using npm ci
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
-      # Step 5: List files (for debugging purposes)
-      - name: List files in the repository
-        run: ls -R
-        # This command lists all files and directories in the repository, helping confirm that App.test.tsx is present
-
-      # Step 6: Print Jest configuration (optional for debugging)
-      - name: Print Jest configuration
-        run: npx jest --showConfig
-
-      # Step 7: Run tests with coverage
+      # Step 4: Run tests with coverage
       - name: Run tests with coverage
         run: |
           CI=true npm run test:ci
-        shell: /usr/bin/bash -e {0}
+
 
       
 
