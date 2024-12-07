@@ -23,20 +23,35 @@ jobs:
         with:
           node-version: '16'  # Compatible version for the project
 
-      # Step 3: Install dependencies
+      # Step 3: Cache node modules (optional but recommended for faster builds)
+      - name: Cache node modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      # Step 4: Install dependencies
       - name: Install dependencies
         run: npm install
 
-      # Step 4: List files (for debugging purposes)
+      # Step 5: List files (for debugging purposes)
       - name: List files in the repository
         run: ls -R
-        # This command will list all files and directories in the root directory, helping confirm that `App.test.tsx` is present
+        # This command lists all files and directories in the repository, helping confirm that `App.test.tsx` is present
 
+      # Step 6: Print Jest configuration (optional for debugging)
       - name: Print Jest configuration
         run: npx jest --showConfig
 
-      # Step 5: Run tests with coverage
+      # Step 7: Run tests with coverage
       - name: Run tests with coverage
-        run: CI=true npm test -- --coverage
+        run: |
+          CI=true npm test -- --coverage
         shell: /usr/bin/bash -e {0}
+
+
+
+
 
