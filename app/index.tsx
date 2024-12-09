@@ -3,6 +3,23 @@ import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from "expo-router";
 
+/**
+ * App component serves as the landing page of the application.
+ * 
+ * **Features:**
+ * - Displays an introductory page with an engaging layout, including images, text, and a "Get Started" button.
+ * - Integrates navigation to the main application page (`/homePage`) using `expo-router`.
+ * - Adapts to different screen sizes with React Native's responsive styling.
+ *
+ * **Sections:**
+ * - **Top Section**: A parachute icon.
+ * - **Middle Section**: A world map illustration.
+ * - **Text Section**: A title and subtitle that introduce the app.
+ * - **Bottom Section**: A "Get Started" button to navigate to the main content.
+ *
+ *
+ * @returns {JSX.Element} The rendered landing page.
+ */
 const App = () => {
   const router = useRouter();
 
@@ -91,7 +108,7 @@ const styles = StyleSheet.create({
     color: '#7f8c8d',
   },
   button: {
-    backgroundColor: '#38b2ac', // Original button color retained
+    backgroundColor: '#38b2ac', 
     paddingVertical: 14,
     paddingHorizontal: 40,
     borderRadius: 25,
@@ -110,5 +127,6 @@ const styles = StyleSheet.create({
 });
 
 export default App;
+
 
 

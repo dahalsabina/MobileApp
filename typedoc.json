@@ -1,6 +1,10 @@
 {
-    "entryPoints": ["./app", "./components", "./constants", "./hooks"],
-    "out": "docs",
-    "entryPointStrategy": "expand"
-  }
-  
+  "entryPoints": ["./app"],
+  "out": "docs",
+  "entryPointStrategy": "expand",
+  "tsconfig": "./tsconfig.json",
+  "exclude": ["**/*.test.ts", "**/*.spec.ts", "**/*.spec.tsx"],
+  "includeVersion": true,
+ 
+  "hideGenerator": true
+}

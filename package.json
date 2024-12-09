@@ -14,17 +14,21 @@
   },
   "jest": {
     "preset": "jest-expo",
-  "collectCoverage": true,
-  "coverageDirectory": "coverage",
-  "coverageReporters": ["json", "lcov", "text", "clover"],
-  "collectCoverageFrom": [
-    "app/**/*.{ts,tsx}",
-    "!app/**/node_modules/**",
-    "!app/**/babel.config.js",
-    "!app/**/expo-env.d.ts",
-    "!app/**/.expo/**"
-  ],
-  
+    "collectCoverage": true,
+    "coverageDirectory": "coverage",
+    "coverageReporters": [
+      "json",
+      "lcov",
+      "text",
+      "clover"
+    ],
+    "collectCoverageFrom": [
+      "app/**/*.{ts,tsx}",
+      "!app/**/node_modules/**",
+      "!app/**/babel.config.js",
+      "!app/**/expo-env.d.ts",
+      "!app/**/.expo/**"
+    ],
     "testMatch": [
       "<rootDir>/__tests__/App.test.tsx"
     ],
@@ -78,4 +82,3 @@
   },
   "private": true
 }
-

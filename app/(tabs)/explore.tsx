@@ -32,7 +32,7 @@ type BoidProps = {
 // Boid simulation parameters (updated to match server)
 const SIMULATION_INTERVAL = 16; // Approx. 60 frames per second
 
-// Perception radii
+
 const ALIGNMENT_PERCEPTION_RADIUS = 50;
 const SEPARATION_PERCEPTION_RADIUS = 25;
 const COHESION_PERCEPTION_RADIUS = 50;
