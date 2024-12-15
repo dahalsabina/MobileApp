@@ -5,7 +5,8 @@
     "strict": true,
     "paths": {
       "@/*": ["./*"]  // Maps "@/..." to project root
-    }
+    },
+    "esModuleInterop": true
   },
   "include": [
     "**/*.ts",
