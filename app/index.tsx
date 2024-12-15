@@ -45,7 +45,7 @@ const App = () => {
 
       {/* Get Started Button */}
       <TouchableOpacity
-        onPress={() => router.push("/homePage")}
+        onPress={() => router.push("/register")}
         style={styles.button}
         activeOpacity={0.7}
       >

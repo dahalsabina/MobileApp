@@ -13,15 +13,13 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.feather.boidtravel"
+      "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      },
-      "package": "com.feather.boidtravel"
+      }
     },
     "web": {
       "bundler": "metro",
@@ -34,11 +32,6 @@
     ],
     "experiments": {
       "typedRoutes": true
-    },
-    "extra": {
-      // "googleClientId": "${GOOGLE_CLIENT_ID}",
-      // "androidClientId": "YOUR_ANDROID_CLIENT_ID",
-      "iosClientId": "{GOOGLE_CLIENT_ID}"
     }
   }
 }
