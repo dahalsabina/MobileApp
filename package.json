@@ -30,7 +30,7 @@
       "!app/**/.expo/**"
     ],
     "testMatch": [
-      "<rootDir>/__tests__/App.test.tsx"
+      "<rootDir>/__tests__/**/*.test.(tsx)"
     ],
     "coverageThreshold": {
       "global": {

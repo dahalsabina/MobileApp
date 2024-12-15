@@ -1,5 +1,3 @@
-
-
 import React, { useState } from 'react';
 import { View, TextInput, TouchableOpacity, Text, StyleSheet, Image, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -11,29 +9,31 @@ const DiscussionPost = () => {
   const [image, setImage] = useState(null);  // For image upload
 
   const handleImagePick = () => {
-    // You can integrate an image picker here.
+    // We can integrate an image picker here.
     // For example, use ImagePicker from Expo to select an image.
   };
+  const API_URL = 'https://senior-project-backend-django.onrender.com/discussion_service/discussions';
 
-  const addDiscussion = async () => {
-    if (!headline.trim() || !notes.trim()) {
-      alert('Both headline and notes are required.');
-      return;
-    }
+const addDiscussion = async () => {
+  if (!headline.trim() || !notes.trim()) {
+    alert('Both headline and notes are required.');
+    return;
+  }
 
-    setLoading(true);
-    try {
-      const response = await fetch('http://127.0.0.1:8000/discussions/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          title: headline,
-          body: notes,
-          image: image, // In case you handle image uploading
-        }),
-      });
+  setLoading(true);
+  try {
+   
+    const response = await fetch(API_URL, { 
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        title: headline,
+        body: notes
+        
+      }),
+    });
 
       if (!response.ok) {
         throw new Error('Failed to add discussion');
@@ -41,7 +41,7 @@ const DiscussionPost = () => {
 
       setHeadline('');
       setNotes('');
-      setImage(null);  // Clear image
+      // setImage(null);  // Clear image
       alert('Discussion added successfully!');
     } catch (err) {
       alert(err instanceof Error ? err.message : 'An unknown error occurred');

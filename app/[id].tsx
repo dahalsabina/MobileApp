@@ -1,14 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ActivityIndicator,
-  TouchableOpacity,
-} from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { useRouter, useLocalSearchParams, useNavigation } from 'expo-router';
 
-// Define the type for a discussion
 type Discussion = {
   id: number;
   title: string;
@@ -16,18 +9,18 @@ type Discussion = {
 };
 
 const DiscussionDetails = () => {
-  const { id } = useLocalSearchParams(); // Retrieve discussion ID from the route
-  const [discussion, setDiscussion] = useState<Discussion | null>(null); // Explicitly type the state
+  const { id } = useLocalSearchParams();
+  const [discussion, setDiscussion] = useState<Discussion | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const router = useRouter();
+  const navigation = useNavigation();
 
-  // Fetch discussion details from the API
   const fetchDiscussionDetails = async () => {
     setLoading(true);
     setError('');
     try {
-      const response = await fetch(`http://127.0.0.1:8000/discussions/${id}`);
+      const API_URL = `https://senior-project-backend-django.onrender.com/discussion_service/discussions/${id}`;
+      const response = await fetch(API_URL);
       if (!response.ok) {
         throw new Error('Failed to load discussion details');
       }
@@ -41,13 +34,24 @@ const DiscussionDetails = () => {
   };
 
   useEffect(() => {
-    fetchDiscussionDetails();
+    if (id) {
+      fetchDiscussionDetails();
+    } else {
+      setError('Discussion ID is missing.');
+      setLoading(false);
+    }
   }, [id]);
+
+  useEffect(() => {
+    if (discussion?.title) {
+      navigation.setOptions({ title: discussion.title });
+    }
+  }, [discussion]);
 
   if (loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#4caf50" />
+        <ActivityIndicator size="large" color="#38b2ac" />
       </View>
     );
   }
@@ -56,9 +60,6 @@ const DiscussionDetails = () => {
     return (
       <View style={styles.centered}>
         <Text style={styles.errorText}>{error}</Text>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Text style={styles.backButtonText}>Go Back</Text>
-        </TouchableOpacity>
       </View>
     );
   }
@@ -67,42 +68,52 @@ const DiscussionDetails = () => {
     return (
       <View style={styles.centered}>
         <Text style={styles.errorText}>Discussion not found</Text>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Text style={styles.backButtonText}>Go Back</Text>
-        </TouchableOpacity>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-        <Text style={styles.backButtonText}>Back</Text>
-      </TouchableOpacity>
-      <Text style={styles.title}>{discussion.title}</Text>
-      <Text style={styles.body}>{discussion.body}</Text>
+      <View style={styles.header}>
+        <Text style={styles.titleText}>{discussion.title}</Text>
+      </View>
+      <View style={styles.bodyContainer}>
+        <Text style={styles.discussionBody}>{discussion.body}</Text>
+      </View>
     </View>
   );
 };
 
-
-
-
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: '#fff' },
-  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 16 },
-  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 10, color: '#333' },
-  body: { fontSize: 18, color: '#555' },
-  errorText: { fontSize: 16, color: 'red', marginBottom: 10 },
-  backButton: {
-    marginVertical: 10,
-    backgroundColor: '#4caf50',
-    padding: 10,
-    borderRadius: 5,
-    alignItems: 'center',
-    alignSelf: 'flex-start',
+  container: { flex: 1, backgroundColor: '#eef2f3', padding: 16 },
+  header: { alignItems: 'center', marginBottom: 20 },
+  titleText: { fontSize: 28, fontWeight: 'bold', color: '#2c3e50' },
+  bodyContainer: {
+    backgroundColor: '#ffffff',
+    borderRadius: 10,
+    padding: 15,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#e5e5e5',
   },
-  backButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
+  discussionBody: {
+    fontSize: 16,
+    color: '#555',
+    lineHeight: 22,
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+  },
+  errorText: { color: 'red', fontSize: 16, marginBottom: 10 },
 });
 
 export default DiscussionDetails;
+
+
+

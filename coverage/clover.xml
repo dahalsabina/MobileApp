@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1733611583303" clover="3.2.0">
-  <project timestamp="1733611583303" name="All files">
-    <metrics statements="271" coveredstatements="4" conditionals="70" coveredconditionals="0" methods="54" coveredmethods="1" elements="395" coveredelements="5" complexity="0" loc="271" ncloc="271" packages="2" files="9" classes="9"/>
+<coverage generated="1733863347591" clover="3.2.0">
+  <project timestamp="1733863347591" name="All files">
+    <metrics statements="271" coveredstatements="5" conditionals="70" coveredconditionals="0" methods="54" coveredmethods="2" elements="395" coveredelements="7" complexity="0" loc="271" ncloc="271" packages="2" files="9" classes="9"/>
     <package name="app">
-      <metrics statements="36" coveredstatements="4" conditionals="8" coveredconditionals="0" methods="9" coveredmethods="1"/>
+      <metrics statements="36" coveredstatements="5" conditionals="8" coveredconditionals="0" methods="9" coveredmethods="2"/>
       <file name="[id].tsx" path="/Users/dahalsabina/Desktop/ReactNativeMobile /app/[id].tsx">
         <metrics statements="30" coveredstatements="0" conditionals="8" coveredconditionals="0" methods="6" coveredmethods="0"/>
         <line num="18" count="0" type="stmt"/>
@@ -35,58 +35,58 @@
         <line num="70" count="0" type="stmt"/>
         <line num="77" count="0" type="stmt"/>
         <line num="79" count="0" type="stmt"/>
-        <line num="88" count="0" type="stmt"/>
+        <line num="91" count="0" type="stmt"/>
       </file>
       <file name="_layout.tsx" path="/Users/dahalsabina/Desktop/ReactNativeMobile /app/_layout.tsx">
         <metrics statements="1" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="0"/>
-        <line num="8" count="0" type="stmt"/>
+        <line num="29" count="0" type="stmt"/>
       </file>
       <file name="index.tsx" path="/Users/dahalsabina/Desktop/ReactNativeMobile /app/index.tsx">
-        <metrics statements="5" coveredstatements="4" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="1"/>
-        <line num="6" count="1" type="stmt"/>
-        <line num="7" count="1" type="stmt"/>
-        <line num="9" count="1" type="stmt"/>
-        <line num="41" count="0" type="stmt"/>
-        <line num="51" count="1" type="stmt"/>
+        <metrics statements="5" coveredstatements="5" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="2"/>
+        <line num="23" count="1" type="stmt"/>
+        <line num="24" count="6" type="stmt"/>
+        <line num="26" count="6" type="stmt"/>
+        <line num="61" count="1" type="stmt"/>
+        <line num="71" count="1" type="stmt"/>
       </file>
     </package>
     <package name="app.(tabs)">
       <metrics statements="235" coveredstatements="0" conditionals="62" coveredconditionals="0" methods="45" coveredmethods="0"/>
       <file name="_layout.tsx" path="/Users/dahalsabina/Desktop/ReactNativeMobile /app/(tabs)/_layout.tsx">
         <metrics statements="7" coveredstatements="0" conditionals="2" coveredconditionals="0" methods="6" coveredmethods="0"/>
-        <line num="8" count="0" type="cond" truecount="0" falsecount="2"/>
-        <line num="10" count="0" type="stmt"/>
+        <line num="25" count="0" type="cond" truecount="0" falsecount="2"/>
         <line num="27" count="0" type="stmt"/>
-        <line num="36" count="0" type="stmt"/>
-        <line num="45" count="0" type="stmt"/>
-        <line num="58" count="0" type="stmt"/>
-        <line num="67" count="0" type="stmt"/>
+        <line num="53" count="0" type="stmt"/>
+        <line num="70" count="0" type="stmt"/>
+        <line num="87" count="0" type="stmt"/>
+        <line num="104" count="0" type="stmt"/>
+        <line num="121" count="0" type="stmt"/>
       </file>
       <file name="discussionPost.tsx" path="/Users/dahalsabina/Desktop/ReactNativeMobile /app/(tabs)/discussionPost.tsx">
         <metrics statements="23" coveredstatements="0" conditionals="12" coveredconditionals="0" methods="3" coveredmethods="0"/>
+        <line num="5" count="0" type="stmt"/>
+        <line num="6" count="0" type="stmt"/>
         <line num="7" count="0" type="stmt"/>
         <line num="8" count="0" type="stmt"/>
         <line num="9" count="0" type="stmt"/>
-        <line num="10" count="0" type="stmt"/>
         <line num="11" count="0" type="stmt"/>
-        <line num="13" count="0" type="stmt"/>
+        <line num="16" count="0" type="stmt"/>
+        <line num="17" count="0" type="cond" truecount="0" falsecount="4"/>
         <line num="18" count="0" type="stmt"/>
-        <line num="19" count="0" type="cond" truecount="0" falsecount="4"/>
-        <line num="20" count="0" type="stmt"/>
-        <line num="21" count="0" type="stmt"/>
+        <line num="19" count="0" type="stmt"/>
+        <line num="22" count="0" type="stmt"/>
+        <line num="23" count="0" type="stmt"/>
         <line num="24" count="0" type="stmt"/>
-        <line num="25" count="0" type="stmt"/>
-        <line num="26" count="0" type="stmt"/>
-        <line num="38" count="0" type="cond" truecount="0" falsecount="2"/>
-        <line num="39" count="0" type="stmt"/>
+        <line num="36" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="37" count="0" type="stmt"/>
+        <line num="40" count="0" type="stmt"/>
+        <line num="41" count="0" type="stmt"/>
         <line num="42" count="0" type="stmt"/>
         <line num="43" count="0" type="stmt"/>
-        <line num="44" count="0" type="stmt"/>
-        <line num="45" count="0" type="stmt"/>
-        <line num="47" count="0" type="cond" truecount="0" falsecount="2"/>
-        <line num="49" count="0" type="stmt"/>
-        <line num="53" count="0" type="stmt"/>
-        <line num="89" count="0" type="stmt"/>
+        <line num="45" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="47" count="0" type="stmt"/>
+        <line num="51" count="0" type="stmt"/>
+        <line num="87" count="0" type="stmt"/>
       </file>
       <file name="explore.tsx" path="/Users/dahalsabina/Desktop/ReactNativeMobile /app/(tabs)/explore.tsx">
         <metrics statements="173" coveredstatements="0" conditionals="40" coveredconditionals="0" methods="27" coveredmethods="0"/>
@@ -266,28 +266,28 @@
       </file>
       <file name="homePage.tsx" path="/Users/dahalsabina/Desktop/ReactNativeMobile /app/(tabs)/homePage.tsx">
         <metrics statements="22" coveredstatements="0" conditionals="8" coveredconditionals="0" methods="5" coveredmethods="0"/>
-        <line num="18" count="0" type="stmt"/>
-        <line num="19" count="0" type="stmt"/>
-        <line num="20" count="0" type="stmt"/>
-        <line num="21" count="0" type="stmt"/>
-        <line num="23" count="0" type="stmt"/>
-        <line num="24" count="0" type="stmt"/>
-        <line num="25" count="0" type="stmt"/>
-        <line num="26" count="0" type="stmt"/>
-        <line num="27" count="0" type="stmt"/>
-        <line num="28" count="0" type="cond" truecount="0" falsecount="2"/>
-        <line num="29" count="0" type="stmt"/>
-        <line num="31" count="0" type="stmt"/>
-        <line num="32" count="0" type="stmt"/>
-        <line num="34" count="0" type="cond" truecount="0" falsecount="2"/>
-        <line num="36" count="0" type="stmt"/>
+        <line num="38" count="0" type="stmt"/>
         <line num="40" count="0" type="stmt"/>
-        <line num="41" count="0" type="stmt"/>
+        <line num="42" count="0" type="stmt"/>
         <line num="44" count="0" type="stmt"/>
-        <line num="45" count="0" type="stmt"/>
+        <line num="59" count="0" type="stmt"/>
+        <line num="60" count="0" type="stmt"/>
         <line num="61" count="0" type="stmt"/>
-        <line num="66" count="0" type="stmt"/>
+        <line num="62" count="0" type="stmt"/>
+        <line num="63" count="0" type="stmt"/>
+        <line num="64" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="65" count="0" type="stmt"/>
+        <line num="67" count="0" type="stmt"/>
+        <line num="68" count="0" type="stmt"/>
+        <line num="70" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="72" count="0" type="stmt"/>
         <line num="84" count="0" type="stmt"/>
+        <line num="85" count="0" type="stmt"/>
+        <line num="101" count="0" type="stmt"/>
+        <line num="102" count="0" type="stmt"/>
+        <line num="118" count="0" type="stmt"/>
+        <line num="123" count="0" type="stmt"/>
+        <line num="143" count="0" type="stmt"/>
       </file>
       <file name="notification.tsx" path="/Users/dahalsabina/Desktop/ReactNativeMobile /app/(tabs)/notification.tsx">
         <metrics statements="7" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="3" coveredmethods="0"/>

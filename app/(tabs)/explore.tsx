@@ -371,6 +371,17 @@ const BoidsSimulation: React.FC = () => {
     return steering;
   };
 
+
+
+
+
+
+
+
+
+
+  
+
   // Function to map world coordinates to screen coordinates
   const mapToScreen = (x: number, y: number) => {
     const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } =

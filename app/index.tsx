@@ -28,6 +28,7 @@ const App = () => {
       {/* Top Section: Parachute Icon */}
       <View style={styles.parachuteContainer}>
         <Image
+          testID="parachute-icon"
           source={require('@/assets/project_images/image1.png')}
           style={styles.parachuteIcon}
         />
@@ -35,7 +36,9 @@ const App = () => {
 
       {/* Middle Section: World Map Illustration */}
       <View style={styles.worldMapContainer}>
+        
         <Image
+          testID="world-map-icon"
           source={require('@/assets/project_images/image2.png')}
           style={styles.worldMapIcon}
         />

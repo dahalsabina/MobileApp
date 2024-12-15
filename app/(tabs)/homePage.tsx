@@ -7,65 +7,46 @@ import {
   StyleSheet,
   FlatList,
   ActivityIndicator,
+  TouchableOpacity,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons'; // Icons for like, comment, and share
 
 type Discussion = {
-  id: number;
+  id: string;
+  discussion_id: string;
   title: string;
   body: string;
+  user_id: string;
+  created_at: string;
+  updated_at: string;
+  likes?: number;
 };
 
-/**
- * HomePage component serves as the main landing page of the application.
- * 
- * **Features:**
- * - Fetches a list of discussions from a remote server.
- * - Displays discussions in a scrollable list using React Native's FlatList.
- * - Provides navigation to a detailed view for each discussion using `expo-router`.
- * - Handles loading and error states to enhance user experience.
- * 
- * **API Endpoint:** 
- * Fetches discussions from `http://127.0.0.1:8000/discussions/`.
- *
- * **State Variables:**
- * - `discussions`: Stores the fetched list of discussions.
- * - `loading`: Indicates whether data is being loaded.
- * - `error`: Stores error messages if the fetch operation fails.
- *
- * 
- * @returns {JSX.Element} The rendered homepage component with discussions and navigation.
- */
 const HomePage = () => {
-  // State to store the fetched discussions
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
-  // State to manage loading indicator visibility
   const [loading, setLoading] = useState(false);
-  // State to manage error messages
   const [error, setError] = useState('');
 
-  /**
-   * Fetches discussions from the API and updates the component's state.
-   * 
-   * **Behavior:**
-   * - Initiates a fetch request to the backend API.
-   * - On success, updates the `discussions` state with the fetched data.
-   * - On failure, captures and sets the error message.
-   * 
-   * @async
-   * @function fetchDiscussions
-   * @throws Will throw an error if the API response status is not `200 OK`.
-   * @returns {Promise<void>}
-   */
+  const API_URL = 'https://senior-project-backend-django.onrender.com/discussion_service/discussions';
+
   const fetchDiscussions = async () => {
     setLoading(true);
     setError('');
     try {
-      const response = await fetch('http://127.0.0.1:8000/discussions/');
+      const response = await fetch(`${API_URL}/`);
       if (!response.ok) {
         throw new Error('Failed to fetch discussions');
       }
       const data = await response.json();
-      setDiscussions(data);
+
+      // Initialize likes for posts
+      const processedData = data.map((item: any, index: number) => ({
+        ...item,
+        id: item.discussion_id || `temp-id-${index}`,
+        likes: Math.floor(Math.random() * 100), // Random initial likes
+      }));
+
+      setDiscussions(processedData);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unknown error occurred');
     } finally {
@@ -73,44 +54,52 @@ const HomePage = () => {
     }
   };
 
-  /**
-   * Runs on component mount to initiate the fetch operation.
-   * 
-   * This effect ensures that discussions are fetched as soon as the page is loaded.
-   * 
-   * @function useEffect
-   * @dependency []
-   */
   useEffect(() => {
     fetchDiscussions();
   }, []);
 
-  /**
-   * Renders an individual discussion item in the FlatList.
-   * 
-   * **Props:**
-   * - `item`: A single discussion object containing `id`, `title`, and `body`.
-   * 
-   * **Navigation:**
-   * - Each discussion links to a detailed view via `expo-router`.
-   * 
-   * @param {Object} param - The props object for the render function.
-   * @param {Discussion} param.item - A discussion object with `id`, `title`, and `body`.
-   * @returns {JSX.Element} A styled component displaying the discussion title and body.
-   */
+  const handleLike = (id: string) => {
+    setDiscussions((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, likes: (item.likes || 0) + 1 } : item
+      )
+    );
+  };
+
   const renderDiscussion = ({ item }: { item: Discussion }) => (
     <View style={styles.discussionItem}>
-      <Link
-        href={{
-          pathname: "/[id]",
-          params: { id: item.id.toString() },
-        }}
-        style={styles.discussionContent}
-      >
+      {/* Header: Post Title */}
+      <View style={styles.headerRow}>
         <Text style={styles.discussionTitle}>{item.title}</Text>
-      </Link>
+      </View>
+
+      {/* Body: Post Content */}
       <View style={styles.bodyContainer}>
         <Text style={styles.discussionBody}>{item.body}</Text>
+      </View>
+
+      {/* Footer: Like, Comment, Share */}
+      <View style={styles.footerRow}>
+        <TouchableOpacity onPress={() => handleLike(item.id)} style={styles.iconButton}>
+          <Ionicons name="heart-outline" size={24} color="#e74c3c" />
+          <Text style={styles.footerText}>{item.likes || 0} Likes</Text>
+        </TouchableOpacity>
+
+        <Link
+          href={{
+            pathname: "/[id]",
+            params: { id: item.id.toString() },
+          }}
+          style={styles.iconButton}
+        >
+          <Ionicons name="chatbubble-outline" size={24} color="#3498db" />
+          <Text style={styles.footerText}>Comment</Text>
+        </Link>
+
+        <TouchableOpacity style={styles.iconButton}>
+          <Ionicons name="share-outline" size={24} color="#2ecc71" />
+          <Text style={styles.footerText}>Share</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -128,9 +117,7 @@ const HomePage = () => {
             <Text style={styles.subtitleText}>Explore discussions from everyone!</Text>
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Recent Discussions</Text>
-              {/* Displays a loading spinner when discussions are being fetched */}
               {loading && <ActivityIndicator size="large" color="#38b2ac" />}
-              {/* Displays an error message if fetching discussions fails */}
               {error && <Text style={styles.errorText}>{error}</Text>}
             </View>
           </View>
@@ -159,26 +146,30 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 3,
   },
-  discussionContent: { marginBottom: 8 },
-  discussionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
-  },
+  headerRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
+  discussionTitle: { fontSize: 18, fontWeight: 'bold', color: '#333' },
   bodyContainer: {
     backgroundColor: '#f9f9f9',
     borderRadius: 8,
     padding: 12,
     borderWidth: 1,
     borderColor: '#e5e5e5',
+    marginBottom: 10,
   },
-  discussionBody: {
-    fontSize: 16,
-    color: '#555',
-    lineHeight: 22,
+  discussionBody: { fontSize: 16, color: '#555', lineHeight: 22 },
+  footerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 10,
   },
+  iconButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  footerText: { marginLeft: 5, fontSize: 14, color: '#555' },
 });
 
 export default HomePage;
+
 
