@@ -1,15 +1,13 @@
-// Import necessary libraries
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-} from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle } from 'react-native-reanimated';
 
 // Define the type for a single boid as received from the server
 type BoidDataFromServer = {
-  userName: string;
-  userID: string;
+  boid_id: number;
+  user_id: number;
+  user_name: string;
+  date_joined: string;
   color: string;
   position_x: number;
   position_y: number;
@@ -20,8 +18,17 @@ type BoidDataFromServer = {
 };
 
 // Extend BoidDataFromServer to include client-side properties
-type BoidType = BoidDataFromServer & {
-  id: string; // Use userID from the server as the unique identifier
+type BoidType = {
+  id: number;          // Use user_id as the unique identifier
+  userID: number;
+  userName: string;
+  color: string;
+  position_x: number;
+  position_y: number;
+  velocity_x: number;
+  velocity_y: number;
+  acceleration_x: number;
+  acceleration_y: number;
 };
 
 // Define props for the Boid component
@@ -29,36 +36,21 @@ type BoidProps = {
   boid: BoidType;
 };
 
-// Boid simulation parameters (updated to match server)
+// Boid simulation parameters will be fetched from server
+// We'll store them in state variables after fetching config
+
 const SIMULATION_INTERVAL = 16; // Approx. 60 frames per second
-
-
-const ALIGNMENT_PERCEPTION_RADIUS = 50;
-const SEPARATION_PERCEPTION_RADIUS = 25;
-const COHESION_PERCEPTION_RADIUS = 50;
-
-// Strength multipliers
-const ALIGNMENT_STRENGTH = 2;
-const COHESION_STRENGTH = 3;
-const SEPARATION_STRENGTH = 5;
-
-// Other constants
-const MAX_FORCE = 0.05;
-const MAX_SPEED = 1;
-const MIN_SCALE_LENGTH = 1e-6;
+const SYNC_INTERVAL = 10000; // Every 10 seconds
 
 const Boid: React.FC<BoidProps> = ({ boid }) => {
-  // Create shared values for position
   const positionX = useSharedValue(boid.position_x);
   const positionY = useSharedValue(boid.position_y);
 
-  // Update shared values whenever the boid's position changes
   useEffect(() => {
     positionX.value = boid.position_x;
     positionY.value = boid.position_y;
   }, [boid.position_x, boid.position_y]);
 
-  // Create an animated style based on the shared position values
   const animatedStyle = useAnimatedStyle(() => {
     return {
       transform: [
@@ -68,24 +60,33 @@ const Boid: React.FC<BoidProps> = ({ boid }) => {
     };
   });
 
-  // Use the color provided by the server
-  const boidColor = boid.color;
-
   return (
     <Animated.View
       style={[
         styles.boid,
         animatedStyle,
-        { backgroundColor: boidColor },
+        { backgroundColor: boid.color },
       ]}
     />
   );
 };
 
 const BoidsSimulation: React.FC = () => {
-  const SERVER_URL =
-    'https://senior-project-backend-django.onrender.com/boids-service/db_boids/';
+  const CONFIG_URL = 'https://senior-project-backend-django.onrender.com/boids_service/config/';
+  const BOIDS_URL = 'https://senior-project-backend-django.onrender.com/boids_service/db_boids/';
+
   const [boids, setBoids] = useState<BoidType[]>([]);
+  const [config, setConfig] = useState<{
+    WORLD_WIDTH: number;
+    WORLD_HEIGHT: number;
+    ALIGNMENT_PERCEPTION_RADIUS: number;
+    SEPERATION_PERCEPTION_RADIUS: number;
+    COHESION_PERCEPTION_RADIUS: number;
+    ALIGNMENT_STRENGTH: number;
+    COHESION_STRENGTH: number;
+    SEPERATION_STRENGTH: number;
+    MIN_SCALE_LENGTH: number;
+  } | null>(null);
 
   // Function to limit a vector's magnitude
   const limitVector = (vector: { x: number; y: number }, max: number) => {
@@ -97,35 +98,54 @@ const BoidsSimulation: React.FC = () => {
     return vector;
   };
 
+  // Fetch configuration
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const response = await fetch(CONFIG_URL);
+        const data = await response.json();
+        setConfig(data);
+      } catch (error) {
+        console.error('Error fetching config:', error);
+      }
+    };
+
+    fetchConfig();
+  }, []);
+
   // Fetch initial boids data
   useEffect(() => {
     const fetchInitialBoids = async () => {
       try {
-        const response = await fetch(SERVER_URL);
-        const data = (await response.json()) as Record<
-          string,
-          BoidDataFromServer
-        >;
+        const response = await fetch(BOIDS_URL);
+        const data = (await response.json()) as Record<string, BoidDataFromServer>;
 
-        const initialBoids = Object.entries(data).map(
-          ([key, serverBoid]) => {
-            // Limit initial velocities
-            const limitedVelocity = limitVector(
-              {
-                x: serverBoid.velocity_x,
-                y: serverBoid.velocity_y,
-              },
-              MAX_SPEED
-            );
+        // We cannot process boids until we have config (for MAX_SPEED, etc.)
+        // We'll assume a default MAX_SPEED if config not available yet.
+        const MAX_SPEED = 0.5;
 
-            return {
-              ...serverBoid,
-              id: serverBoid.userID,
-              velocity_x: limitedVelocity.x,
-              velocity_y: limitedVelocity.y,
-            } as BoidType;
-          }
-        );
+        const initialBoids = Object.entries(data).map(([key, serverBoid]) => {
+          const limitedVelocity = limitVector(
+            {
+              x: serverBoid.velocity_x,
+              y: serverBoid.velocity_y,
+            },
+            MAX_SPEED
+          );
+
+          return {
+            id: serverBoid.user_id,
+            userID: serverBoid.user_id,
+            userName: serverBoid.user_name,
+            color: serverBoid.color,
+            position_x: serverBoid.position_x,
+            position_y: serverBoid.position_y,
+            velocity_x: limitedVelocity.x,
+            velocity_y: limitedVelocity.y,
+            acceleration_x: serverBoid.acceleration_x,
+            acceleration_y: serverBoid.acceleration_y,
+          } as BoidType;
+        });
 
         setBoids(initialBoids);
       } catch (error) {
@@ -136,18 +156,45 @@ const BoidsSimulation: React.FC = () => {
     fetchInitialBoids();
   }, []);
 
-  // Run boids simulation locally
+  // Run boids simulation locally after config and boids are available
   useEffect(() => {
+    if (!config || boids.length === 0) return;
+
+    const {
+      WORLD_WIDTH,
+      WORLD_HEIGHT,
+      ALIGNMENT_PERCEPTION_RADIUS,
+      SEPERATION_PERCEPTION_RADIUS,
+      COHESION_PERCEPTION_RADIUS,
+      ALIGNMENT_STRENGTH,
+      COHESION_STRENGTH,
+      SEPERATION_STRENGTH,
+      MIN_SCALE_LENGTH,
+    } = config;
+
+    const MAX_FORCE = 0.05;
+    const MAX_SPEED = 0.5;
+
     const intervalId = setInterval(() => {
       setBoids((prevBoids) => {
         return prevBoids.map((boid, _, allBoids) => {
-          const acceleration = calculateBoidAcceleration(boid, allBoids);
+          const acceleration = calculateBoidAcceleration(boid, allBoids, {
+            ALIGNMENT_PERCEPTION_RADIUS,
+            SEPERATION_PERCEPTION_RADIUS,
+            COHESION_PERCEPTION_RADIUS,
+            ALIGNMENT_STRENGTH,
+            COHESION_STRENGTH,
+            SEPERATION_STRENGTH,
+            MIN_SCALE_LENGTH,
+            MAX_FORCE,
+            MAX_SPEED,
+          });
 
           // Update velocity
           let newVelocityX = boid.velocity_x + acceleration.x;
           let newVelocityY = boid.velocity_y + acceleration.y;
 
-          // Limit speed to MAX_SPEED
+          // Limit speed
           let speed = Math.hypot(newVelocityX, newVelocityY);
           if (speed > MAX_SPEED) {
             newVelocityX = (newVelocityX / speed) * MAX_SPEED;
@@ -159,9 +206,6 @@ const BoidsSimulation: React.FC = () => {
           let newPositionY = boid.position_y + newVelocityY;
 
           // Handle wrapping around world edges
-          const WORLD_WIDTH = 1000;
-          const WORLD_HEIGHT = 1000;
-
           if (newPositionX > WORLD_WIDTH) newPositionX = 0;
           else if (newPositionX < 0) newPositionX = WORLD_WIDTH;
 
@@ -180,69 +224,60 @@ const BoidsSimulation: React.FC = () => {
     }, SIMULATION_INTERVAL);
 
     return () => clearInterval(intervalId);
-  }, []);
+  }, [config, boids]);
 
   // Periodic synchronization with server
   useEffect(() => {
-    const SYNC_INTERVAL = 10000; // Every 10 seconds
+    if (!config) return;
+
+    const MAX_SPEED = 0.5; // Must match simulation MAX_SPEED
 
     const syncWithServer = async () => {
       try {
-        const response = await fetch(SERVER_URL);
-        const data = (await response.json()) as Record<
-          string,
-          BoidDataFromServer
-        >;
+        const response = await fetch(BOIDS_URL);
+        const data = (await response.json()) as Record<string, BoidDataFromServer>;
 
-        const serverBoids = Object.entries(data).map(
-          ([key, serverBoid]) => {
-            // Limit velocities from server
-            const limitedVelocity = limitVector(
-              {
-                x: serverBoid.velocity_x,
-                y: serverBoid.velocity_y,
-              },
-              MAX_SPEED
-            );
-
-            return {
-              ...serverBoid,
-              id: serverBoid.userID,
-              velocity_x: limitedVelocity.x,
-              velocity_y: limitedVelocity.y,
-            } as BoidType;
-          }
-        );
+        const serverBoids = Object.entries(data).map(([key, serverBoid]) => {
+          const limitedVelocity = limitVector(
+            {
+              x: serverBoid.velocity_x,
+              y: serverBoid.velocity_y,
+            },
+            MAX_SPEED
+          );
+          return {
+            id: serverBoid.user_id,
+            userID: serverBoid.user_id,
+            userName: serverBoid.user_name,
+            color: serverBoid.color,
+            position_x: serverBoid.position_x,
+            position_y: serverBoid.position_y,
+            velocity_x: limitedVelocity.x,
+            velocity_y: limitedVelocity.y,
+            acceleration_x: serverBoid.acceleration_x,
+            acceleration_y: serverBoid.acceleration_y,
+          } as BoidType;
+        });
 
         setBoids((prevBoids) => {
-          // Create a map of server boids by id
-          const serverBoidsMap = new Map<string, BoidType>();
-          serverBoids.forEach((serverBoid) => {
-            serverBoidsMap.set(serverBoid.id, serverBoid);
-          });
+          const serverBoidsMap = new Map<number, BoidType>();
+          serverBoids.forEach((sb) => serverBoidsMap.set(sb.id, sb));
 
           // Update existing boids
           const updatedBoids = prevBoids.map((boid) => {
             const serverBoid = serverBoidsMap.get(boid.id);
             if (serverBoid) {
-              // Update boid with server data
-              return {
-                ...boid,
-                ...serverBoid,
-              };
+              return { ...boid, ...serverBoid };
             } else {
-              // Boid not in server data, decide whether to keep or remove
-              // For now, we keep it
               return boid;
             }
           });
 
           // Add new boids from server that are not in prevBoids
-          const prevBoidsIds = new Set(prevBoids.map((boid) => boid.id));
-          serverBoids.forEach((serverBoid) => {
-            if (!prevBoidsIds.has(serverBoid.id)) {
-              // New boid, add it
-              updatedBoids.push(serverBoid);
+          const prevBoidsIds = new Set(prevBoids.map((b) => b.id));
+          serverBoids.forEach((sb) => {
+            if (!prevBoidsIds.has(sb.id)) {
+              updatedBoids.push(sb);
             }
           });
 
@@ -253,25 +288,42 @@ const BoidsSimulation: React.FC = () => {
       }
     };
 
-    const intervalId = setInterval(() => {
-      syncWithServer();
-    }, SYNC_INTERVAL);
-
+    const intervalId = setInterval(syncWithServer, SYNC_INTERVAL);
     return () => clearInterval(intervalId);
-  }, []);
+  }, [config]);
 
-  // Calculate boid acceleration based on boids algorithm  to match server)
   const calculateBoidAcceleration = (
     boid: BoidType,
-    allBoids: BoidType[]
+    allBoids: BoidType[],
+    {
+      ALIGNMENT_PERCEPTION_RADIUS,
+      SEPERATION_PERCEPTION_RADIUS,
+      COHESION_PERCEPTION_RADIUS,
+      ALIGNMENT_STRENGTH,
+      COHESION_STRENGTH,
+      SEPERATION_STRENGTH,
+      MIN_SCALE_LENGTH,
+      MAX_FORCE,
+      MAX_SPEED,
+    }: {
+      ALIGNMENT_PERCEPTION_RADIUS: number;
+      SEPERATION_PERCEPTION_RADIUS: number;
+      COHESION_PERCEPTION_RADIUS: number;
+      ALIGNMENT_STRENGTH: number;
+      COHESION_STRENGTH: number;
+      SEPERATION_STRENGTH: number;
+      MIN_SCALE_LENGTH: number;
+      MAX_FORCE: number;
+      MAX_SPEED: number;
+    }
   ) => {
     let alignment = { x: 0, y: 0 };
     let cohesion = { x: 0, y: 0 };
-    let separation = { x: 0, y: 0 };
+    let seperation = { x: 0, y: 0 };
 
     let totalAlignment = 0;
     let totalCohesion = 0;
-    let totalSeparation = 0;
+    let totalSeperation = 0;
 
     allBoids.forEach((otherBoid) => {
       if (otherBoid.id !== boid.id) {
@@ -293,23 +345,21 @@ const BoidsSimulation: React.FC = () => {
           totalCohesion++;
         }
 
-        // Separation
-        if (distance < SEPARATION_PERCEPTION_RADIUS && distance > 0) {
+        // Seperation
+        if (distance < SEPERATION_PERCEPTION_RADIUS && distance > 0) {
           let diffX = boid.position_x - otherBoid.position_x;
           let diffY = boid.position_y - otherBoid.position_y;
-          // Avoid division by zero
           if (distance !== 0) {
             diffX /= distance * distance;
             diffY /= distance * distance;
           }
-          separation.x += diffX;
-          separation.y += diffY;
-          totalSeparation++;
+          seperation.x += diffX;
+          seperation.y += diffY;
+          totalSeperation++;
         }
       }
     });
 
-    // Compute final steering forces
     let steering = { x: 0, y: 0 };
 
     // Alignment
@@ -350,54 +400,51 @@ const BoidsSimulation: React.FC = () => {
       steering.y += cohesion.y;
     }
 
-    // Separation
-    if (totalSeparation > 0) {
-      separation.x /= totalSeparation;
-      separation.y /= totalSeparation;
-      let separationMag = Math.hypot(separation.x, separation.y);
-      if (separationMag > MIN_SCALE_LENGTH) {
-        separation.x = (separation.x / separationMag) * MAX_SPEED;
-        separation.y = (separation.y / separationMag) * MAX_SPEED;
+    // Seperation
+    if (totalSeperation > 0) {
+      seperation.x /= totalSeperation;
+      seperation.y /= totalSeperation;
+      let seperationMag = Math.hypot(seperation.x, seperation.y);
+      if (seperationMag > MIN_SCALE_LENGTH) {
+        seperation.x = (seperation.x / seperationMag) * MAX_SPEED;
+        seperation.y = (seperation.y / seperationMag) * MAX_SPEED;
       }
-      separation.x -= boid.velocity_x;
-      separation.y -= boid.velocity_y;
-      separation = limitVector(separation, MAX_FORCE);
-      separation.x *= SEPARATION_STRENGTH;
-      separation.y *= SEPARATION_STRENGTH;
-      steering.x += separation.x;
-      steering.y += separation.y;
+      seperation.x -= boid.velocity_x;
+      seperation.y -= boid.velocity_y;
+      seperation = limitVector(seperation, MAX_FORCE);
+      seperation.x *= SEPERATION_STRENGTH;
+      seperation.y *= SEPERATION_STRENGTH;
+      steering.x += seperation.x;
+      steering.y += seperation.y;
     }
 
     return steering;
   };
 
-
-
-
-
-
-
-
-
-
-  
-
   // Function to map world coordinates to screen coordinates
   const mapToScreen = (x: number, y: number) => {
-    const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } =
-      Dimensions.get('window');
-    const WORLD_WIDTH = 1000;
-    const WORLD_HEIGHT = 1000;
+    const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+    if (!config) {
+      // Fallback if config not loaded
+      return { x, y };
+    }
+
+    const { WORLD_WIDTH, WORLD_HEIGHT } = config;
     return {
       x: (x / WORLD_WIDTH) * SCREEN_WIDTH,
       y: (y / WORLD_HEIGHT) * SCREEN_HEIGHT,
     };
   };
 
+  if (!config) {
+    // Show nothing or a loader until config is fetched
+    return <View style={styles.container} />;
+  }
+
   return (
     <View style={styles.container}>
       {boids.map((boid) => {
-        // Map world positions to screen positions
+        // Map world positions to screen positions based on server config
         const screenPosition = mapToScreen(boid.position_x, boid.position_y);
         const boidWithScreenPosition = {
           ...boid,
@@ -416,11 +463,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#0e0b16',
   },
   boid: {
-    width: 5,
-    height: 5,
+    width: 10,
+    height: 10,
     position: 'absolute',
-    borderRadius: 2.5,
+    borderRadius: 5,
   },
 });
 
 export default BoidsSimulation;
+

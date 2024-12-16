@@ -12,7 +12,7 @@ const DiscussionPost = () => {
     // We can integrate an image picker here.
     // For example, use ImagePicker from Expo to select an image.
   };
-  const API_URL = 'https://senior-project-backend-django.onrender.com/discussion_service/discussions';
+  const API_URL = 'http://127.0.0.1:8000/';
 
 const addDiscussion = async () => {
   if (!headline.trim() || !notes.trim()) {
@@ -23,7 +23,7 @@ const addDiscussion = async () => {
   setLoading(true);
   try {
    
-    const response = await fetch(API_URL, { 
+    const response = await fetch(`${API_URL}/discussions/`, { 
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

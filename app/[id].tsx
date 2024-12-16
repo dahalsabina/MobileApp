@@ -19,7 +19,7 @@ const DiscussionDetails = () => {
     setLoading(true);
     setError('');
     try {
-      const API_URL = `https://senior-project-backend-django.onrender.com/discussion_service/discussions/${id}`;
+      const API_URL = `http://127.0.0.1:8000/discussions/${id}`;
       const response = await fetch(API_URL);
       if (!response.ok) {
         throw new Error('Failed to load discussion details');
@@ -117,3 +117,7 @@ export default DiscussionDetails;
 
 
 
+  
+    
+
+      

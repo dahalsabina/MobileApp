@@ -7,9 +7,7 @@ import {
   StyleSheet,
   FlatList,
   ActivityIndicator,
-  TouchableOpacity,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons'; // Icons for like, comment, and share
 
 type Discussion = {
   id: string;
@@ -19,7 +17,6 @@ type Discussion = {
   user_id: string;
   created_at: string;
   updated_at: string;
-  likes?: number;
 };
 
 const HomePage = () => {
@@ -27,23 +24,21 @@ const HomePage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const API_URL = 'https://senior-project-backend-django.onrender.com/discussion_service/discussions';
+  const API_URL = 'http://127.0.0.1:8000/';
 
   const fetchDiscussions = async () => {
     setLoading(true);
     setError('');
     try {
-      const response = await fetch(`${API_URL}/`);
+      const response = await fetch(`${API_URL}/discussions/`);
       if (!response.ok) {
         throw new Error('Failed to fetch discussions');
       }
       const data = await response.json();
 
-      // Initialize likes for posts
       const processedData = data.map((item: any, index: number) => ({
         ...item,
         id: item.discussion_id || `temp-id-${index}`,
-        likes: Math.floor(Math.random() * 100), // Random initial likes
       }));
 
       setDiscussions(processedData);
@@ -58,48 +53,22 @@ const HomePage = () => {
     fetchDiscussions();
   }, []);
 
-  const handleLike = (id: string) => {
-    setDiscussions((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, likes: (item.likes || 0) + 1 } : item
-      )
-    );
-  };
-
   const renderDiscussion = ({ item }: { item: Discussion }) => (
     <View style={styles.discussionItem}>
-      {/* Header: Post Title */}
-      <View style={styles.headerRow}>
-        <Text style={styles.discussionTitle}>{item.title}</Text>
-      </View>
+      {/* Clickable Title that links to another page */}
+      <Link
+        href={{
+          pathname: '/[id]',
+          params: { id: item.id.toString() },
+        }}
+        style={styles.discussionTitle}
+      >
+        <Text style={styles.clickableTitle}>{item.title}</Text>
+      </Link>
 
       {/* Body: Post Content */}
       <View style={styles.bodyContainer}>
         <Text style={styles.discussionBody}>{item.body}</Text>
-      </View>
-
-      {/* Footer: Like, Comment, Share */}
-      <View style={styles.footerRow}>
-        <TouchableOpacity onPress={() => handleLike(item.id)} style={styles.iconButton}>
-          <Ionicons name="heart-outline" size={24} color="#e74c3c" />
-          <Text style={styles.footerText}>{item.likes || 0} Likes</Text>
-        </TouchableOpacity>
-
-        <Link
-          href={{
-            pathname: "/[id]",
-            params: { id: item.id.toString() },
-          }}
-          style={styles.iconButton}
-        >
-          <Ionicons name="chatbubble-outline" size={24} color="#3498db" />
-          <Text style={styles.footerText}>Comment</Text>
-        </Link>
-
-        <TouchableOpacity style={styles.iconButton}>
-          <Ionicons name="share-outline" size={24} color="#2ecc71" />
-          <Text style={styles.footerText}>Share</Text>
-        </TouchableOpacity>
       </View>
     </View>
   );
@@ -146,8 +115,13 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 3,
   },
-  headerRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
-  discussionTitle: { fontSize: 18, fontWeight: 'bold', color: '#333' },
+  discussionTitle: { marginBottom: 8 },
+  clickableTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#3498db',
+    textDecorationLine: 'underline',
+  },
   bodyContainer: {
     backgroundColor: '#f9f9f9',
     borderRadius: 8,
@@ -157,19 +131,9 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   discussionBody: { fontSize: 16, color: '#555', lineHeight: 22 },
-  footerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  iconButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  footerText: { marginLeft: 5, fontSize: 14, color: '#555' },
 });
 
 export default HomePage;
+
 
 
