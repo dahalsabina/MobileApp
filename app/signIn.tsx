@@ -54,7 +54,7 @@ const SigninPage = () => {
       }
     } catch (error) {
       console.error('Google Sign-In Error:', error);
-      Alert.alert('Google Sign-In Error', error.message || 'An unexpected error occurred.');
+    
     }
   };
   

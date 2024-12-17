@@ -44,6 +44,6 @@ describe('App Component', () => {
     const button = getByText('Get Started');
 
     fireEvent.press(button);
-    expect(mockRouter.push).toHaveBeenCalledWith('/homePage');
+    expect(mockRouter.push).toHaveBeenCalledWith('/register');
   });
 });

@@ -1,70 +1,146 @@
 import React, { useState } from 'react';
-import { View, TextInput, TouchableOpacity, Text, StyleSheet, Image, ActivityIndicator } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  TouchableOpacity,
+  ActivityIndicator,
+  Alert,
+} from 'react-native';
+import { useRouter } from 'expo-router';
 
+/**
+ * DiscussionPost Component
+ *
+ * This component provides a form to create a new discussion post.
+ * It allows the user to enter a headline (title) and notes (body) for the discussion,
+ * and submits the data to a backend server.
+ * 
+ * **Features**:
+ * - Validates required input fields (headline and notes).
+ * - Sends a POST request to the server with the discussion data.
+ * - Displays a loading indicator while the request is in progress.
+ * - Navigates to the Home Page after successfully posting the discussion.
+ * - Handles API errors and displays relevant alerts.
+ *
+ * 
+ * @returns {JSX.Element} The rendered DiscussionPost component.
+ */
 const DiscussionPost = () => {
-  const [headline, setHeadline] = useState('');
-  const [notes, setNotes] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [image, setImage] = useState(null);  // For image upload
+  /**
+   * State to manage the headline (title) input field.
+   * @type {[string, React.Dispatch<React.SetStateAction<string>>]}
+   */
+  const [headline, setHeadline] = useState<string>('');
 
-  const handleImagePick = () => {
-    // We can integrate an image picker here.
-    // For example, use ImagePicker from Expo to select an image.
-  };
-  const API_URL = 'http://127.0.0.1:8000/';
+  /**
+   * State to manage the notes (body) input field.
+   * @type {[string, React.Dispatch<React.SetStateAction<string>>]}
+   */
+  const [notes, setNotes] = useState<string>('');
 
-const addDiscussion = async () => {
-  if (!headline.trim() || !notes.trim()) {
-    alert('Both headline and notes are required.');
-    return;
-  }
+  /**
+   * State to manage the loading indicator during the API call.
+   * When `loading` is true, a spinner is displayed on the submit button.
+   * @type {[boolean, React.Dispatch<React.SetStateAction<boolean>>]}
+   */
+  const [loading, setLoading] = useState<boolean>(false);
 
-  setLoading(true);
-  try {
-   
-    const response = await fetch(`${API_URL}/discussions/`, { 
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
+  /**
+   * The router instance from Expo Router for navigation between screens.
+   */
+  const router = useRouter();
+
+  /**
+   * The base URL for the backend API endpoint to post discussions.
+   * @constant {string}
+   */
+  const API_URL = 'http://127.0.0.1:8000/discussions/';
+
+  /**
+   * Handles the submission of a new discussion post.
+   *
+   * - Validates that both `headline` and `notes` fields are not empty.
+   * - Sends a POST request to the API with the discussion data.
+   * - Displays success or error messages based on the API response.
+   * - Navigates back to the home page upon successful submission.
+   *
+   * @async
+   * @function addDiscussion
+   * @returns {Promise<void>} A promise that resolves when the request is completed.
+   */
+  const addDiscussion = async (): Promise<void> => {
+    // Validate that required fields are not empty
+    if (!headline.trim() || !notes.trim()) {
+      Alert.alert('Error', 'Both headline and notes are required.');
+      return;
+    }
+
+    setLoading(true); // Set loading state to true during API call
+
+    try {
+      
+      const payload = {
         title: headline,
-        body: notes
-        
-      }),
-    });
+        body: notes,
+        user_id: 'sample-user-id', 
+      };
 
+      console.log('Sending Payload:', payload);
+
+      // Send the POST request to the API
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      // Parse the response data
+      const responseData = await response.json();
+
+      // Check for server errors
       if (!response.ok) {
-        throw new Error('Failed to add discussion');
+        console.error('Server Error:', responseData);
+        throw new Error(responseData.error || 'Failed to add discussion');
       }
 
+      // Show success message
+      Alert.alert('Success', 'Discussion added successfully!');
+
+      // Reset input fields after successful submission
       setHeadline('');
       setNotes('');
-      // setImage(null);  // Clear image
-      alert('Discussion added successfully!');
+
+      // Navigate to the Home Page
+      router.replace({
+        pathname: '/(tabs)/homePage',
+      });
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'An unknown error occurred');
+      // Handle any errors during the API call
+      Alert.alert('Error', err instanceof Error ? err.message : 'An unknown error occurred');
     } finally {
+      // Set loading state back to false
       setLoading(false);
     }
   };
 
   return (
     <View style={styles.container}>
-      <View style={styles.imageContainer}>
-        <TouchableOpacity onPress={handleImagePick} style={styles.imagePicker}>
-          <Ionicons name="add" size={32} color="#fff" />
-        </TouchableOpacity>
-        {image && <Image source={{ uri: image }} style={styles.selectedImage} />}
-      </View>
+      {/* Form Header */}
+      <Text style={styles.headerText}>Add a New Discussion</Text>
 
+      {/* Input for Headline (Title) */}
       <TextInput
         style={styles.input}
         placeholder="Headline"
         value={headline}
         onChangeText={setHeadline}
       />
+
+      {/* Input for Notes (Body) */}
       <TextInput
         style={[styles.input, styles.textArea]}
         placeholder="Notes"
@@ -73,8 +149,7 @@ const addDiscussion = async () => {
         multiline
       />
 
-      
-
+      {/* Submit Button or Loading Indicator */}
       {loading ? (
         <ActivityIndicator size="large" color="#38b2ac" />
       ) : (
@@ -86,53 +161,50 @@ const addDiscussion = async () => {
   );
 };
 
+/**
+ * Styles for the DiscussionPost component.
+ * Includes styles for the container, inputs, button, and header text.
+ */
 const styles = StyleSheet.create({
+  /** Container style for the entire form */
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    padding: 16,
-  },
-  imageContainer: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  imagePicker: {
-    backgroundColor: '#38b2ac',
-    borderRadius: 50,
+    backgroundColor: '#f4f4f4',
     padding: 20,
-    marginBottom: 10,
+    justifyContent: 'center',
   },
-  selectedImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 10,
-    marginTop: 10,
+  /** Header text style for the form */
+  headerText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#2c3e50',
+    marginBottom: 20,
+    textAlign: 'center',
   },
+  /** Style for text input fields */
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
     padding: 12,
     borderRadius: 8,
     marginBottom: 10,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#fff',
   },
+  /** Style for multi-line text area input */
   textArea: {
-    height: 100,
+    height: 120,
     textAlignVertical: 'top',
   },
-  toolbar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-  },
+  /** Style for the submit button */
   button: {
     backgroundColor: '#38b2ac',
     paddingVertical: 14,
-    paddingHorizontal: 40,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
+    marginTop: 10,
   },
+  /** Style for the button text */
   buttonText: {
     color: '#fff',
     fontWeight: 'bold',

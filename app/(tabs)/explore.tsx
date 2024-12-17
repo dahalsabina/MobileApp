@@ -120,8 +120,7 @@ const BoidsSimulation: React.FC = () => {
         const response = await fetch(BOIDS_URL);
         const data = (await response.json()) as Record<string, BoidDataFromServer>;
 
-        // We cannot process boids until we have config (for MAX_SPEED, etc.)
-        // We'll assume a default MAX_SPEED if config not available yet.
+        
         const MAX_SPEED = 0.5;
 
         const initialBoids = Object.entries(data).map(([key, serverBoid]) => {
