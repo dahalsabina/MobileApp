@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "boidtravel",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/splash.png",
@@ -36,9 +36,13 @@
       "typedRoutes": true
     },
     "extra": {
-      // "googleClientId": "${GOOGLE_CLIENT_ID}",
-      // "androidClientId": "YOUR_ANDROID_CLIENT_ID",
-      "iosClientId": "{GOOGLE_CLIENT_ID}"
+      // "iosClientId": "{GOOGLE_CLIENT_ID}",
+      // "router": {
+      //   "origin": false
+      // },
+      "eas": {
+        "projectId": "806b226d-fac2-46e3-9b70-9225f77cd5f1"
+      }
     }
   }
 }
