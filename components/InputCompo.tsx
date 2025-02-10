@@ -5,9 +5,11 @@ export interface InputProps {
   /** Used to locate this view in end-to-end tests. */
   testID?: string;
   text?: string;
+  curValue?: string;
+  curChange?: (text: string) => void;
 }
 
-export function InputCompo({ testID, text}: InputProps) {
+export function InputCompo({ testID, text, curValue, curChange}: InputProps) {
   return (
     <View style={styles.root} testID={testID ?? '1:9'}>
       <View style={styles.rectangle2} testID="1:10" />
@@ -16,6 +18,8 @@ export function InputCompo({ testID, text}: InputProps) {
       placeholder={text}
       keyboardType='email-address'
       autoCapitalize='none'
+      value={curValue}
+      onChangeText={curChange}
       />
     </View>
   );

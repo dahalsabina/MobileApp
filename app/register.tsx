@@ -1,11 +1,13 @@
 import{ ButtonCompo }from '@/components/ButtonCompo';
 import{ InputCompo }from '@/components/InputCompo';
-import React from 'react';
+import React, {useState} from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import greenCircle from "@/assets/project_images/shape.png";
 import { useRouter } from 'expo-router';
 import { useFonts } from 'expo-font';
+import { auth } from '../firebaseConfig'
+import { createUserWithEmailAndPassword } from "firebase/auth";
 
 const RegisterPage = () => {
   const handlePress = () => {
@@ -14,11 +16,26 @@ const RegisterPage = () => {
   };
   const router = useRouter();
 
-  const [fontsLoaded] = useFonts({
-    Praise: require('../assets/fonts/Praise-Regular.ttf'),
-    Poppins: require('../assets/fonts/Poppins-Regular.ttf')
-  });
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
 
+
+  const handleSignUp = () => {
+    auth
+    createUserWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        // Signed up 
+        const user = userCredential.user;
+        console.log(user.email)
+        // ...
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        // ..
+      });
+  }
+  
 
   return (
     <View>
@@ -35,13 +52,13 @@ const RegisterPage = () => {
           </View>
           <View style={styles.inputContainer}>
             <InputCompo text='Enter your name' />
-            <InputCompo text='Enter your email' />
-            <InputCompo text='Enter password' />
+            <InputCompo text='Enter your email'  curValue={email} curChange={(text) => setEmail(text)} />
+            <InputCompo text='Enter password' curValue={password} curChange={(text) => setPassword(text)} />
             <InputCompo text='Confirm password' />
             <Text style={styles.agreement}>*By clicking register, you agree with the app's privary policy...</Text>
           </View>
           <View style={styles.register}>
-            <ButtonCompo onPress={handlePress} text='Register'>
+            <ButtonCompo onPress={handleSignUp} text='Register'>
             </ButtonCompo>
           </View>
           <View style={styles.signinContainer}>
