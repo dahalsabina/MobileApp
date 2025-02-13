@@ -10,10 +10,6 @@ import { auth } from '../firebaseConfig'
 import { createUserWithEmailAndPassword } from "firebase/auth";
 
 const RegisterPage = () => {
-  const handlePress = () => {
-    // google authentication
-    Alert.alert('google authentication');
-  };
   const router = useRouter();
 
   const [email, setEmail] = useState('')
@@ -64,7 +60,7 @@ const RegisterPage = () => {
           <View style={styles.signinContainer}>
             <Text style={styles.haveAccount}>Already have an account?</Text>
             <TouchableOpacity
-              onPress={() => router.push("/homePage")}
+              onPress={() => router.push("./signIn")}
               activeOpacity={0.7}>
             <Text style={styles.signin}>Sign in</Text>
           </TouchableOpacity>

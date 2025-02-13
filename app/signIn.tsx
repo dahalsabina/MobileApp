@@ -1,62 +1,33 @@
 import{ ButtonCompo }from '@/components/ButtonCompo';
 import{ InputCompo }from '@/components/InputCompo';
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { useFonts } from 'expo-font';
-import * as Google from 'expo-auth-session/providers/google';
-import Constants from 'expo-constants';
-import * as AuthSession from 'expo-auth-session';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '@/firebaseConfig';
 
 const SigninPage = () => {
-  const handlePress = () => {
-    // google authentication
-    Alert.alert('google authentication');
-  };
   const router = useRouter();
 
-  const [fontsLoaded] = useFonts({
-    Praise: require('../assets/fonts/Praise-Regular.ttf'),
-    Poppins: require('../assets/fonts/Poppins-Regular.ttf'),
-    SemiBoldPoppins: require('../assets/fonts/Poppins-SemiBold.ttf')
-  });
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
 
-  const iosGoogleClientId = 
-  // process.env.GOOGLE_CLIENT_ID;
-  "359637781473-fgkpsomsiavl1mon0q2lkt3orf9ijstg.apps.googleusercontent.com"
 
-  // Google Authentication Hook
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    androidClientId: '',
-    iosClientId: iosGoogleClientId,
-    webClientId: '',
-  });
-
-  const redirectUri = AuthSession.makeRedirectUri({
-    // Specify the useProxy option directly in the context of the method
-    path: '', // Optional: Use if you need a specific path
-    preferLocalhost: false, // Ensures the Expo proxy is used when available
-  });
-  console.log('Redirect URI:', redirectUri);
-  
-  const handleGoogleSignIn = async () => {
-    try {
-      const result = await promptAsync();
-      if (result.type === 'success') {
-        const { authentication } = result;
-  
-        // Mocking backend call
-        Alert.alert('Signed in successfully! Token:', authentication?.accessToken);
-        router.push('/homePage');
-      } else if (result.type === 'dismiss') {
-        Alert.alert('Sign-in dismissed');
-      }
-    } catch (error) {
-      console.error('Google Sign-In Error:', error);
-    
-    }
-  };
+  const handleSignIn = () => {
+    auth
+    signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        // Signed in 
+        const user = userCredential.user;
+        console.log(user.email)
+        // ...
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+      });
+  }
   
 
   return (
@@ -77,20 +48,20 @@ const SigninPage = () => {
           </View>
           </View>
           <View style={styles.inputContainer}>
-            <InputCompo text='Enter your email' />
-            <InputCompo text='Enter password' />
+            <InputCompo text='Enter your email' curValue={email} curChange={(text) => setEmail(text)}/>
+            <InputCompo text='Enter password' curValue={password} curChange={(text) => setPassword(text)}/>
             <Text style={styles.agreement}>*Forget password</Text>
           </View>
           <View style={styles.register}>
-            <ButtonCompo onPress={handlePress} text='Sign in'>
+            <ButtonCompo onPress={handleSignIn} text='Sign in'>
             </ButtonCompo>
           </View>
           <View style={styles.signinContainer}>
             <Text style={styles.haveAccount}>Don't have an account yet?</Text>
             <TouchableOpacity
-              onPress={handleGoogleSignIn} 
+              onPress={() => router.push("./register")}
               activeOpacity={0.7}>
-            <Text style={styles.signup}>Sign up with Google</Text>
+            <Text style={styles.signup}>Sign up</Text>
           </TouchableOpacity>
           </View>
         </View>

@@ -38,7 +38,7 @@ try {
 } catch (error) {
   // If getAuth fails, we must initialize Auth
   auth = initializeAuth(app, {
-    persistence: getReactNativePersistence(AsyncStorage)
+    persistence: getReactNativePersistence(ReactNativeAsyncStorage)
   });
 }
 // const auth = initializeAuth(app, {
