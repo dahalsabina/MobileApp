@@ -12,20 +12,46 @@ const SigninPage = () => {
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [inputErrors, setInputErrors] = useState({ email: false, password: false });
+
 
 
   const handleSignIn = () => {
+    setInputErrors({ email: false, password: false });
+
     auth
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         // Signed in 
         const user = userCredential.user;
         console.log(user.email)
+        router.push("./homePage")
         // ...
       })
       .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
+        let errorMessage = '';
+        const newInputErrors = { email: false, password: false };
+
+        switch (error.code) {
+          case 'auth/invalid-email':
+            errorMessage = 'Invalid email.';
+            newInputErrors.email = true;
+            break;
+          case 'auth/missing-password':
+            errorMessage = 'Password is required.';
+            newInputErrors.password = true;
+            break;
+          case 'auth/invalid-credential':
+            errorMessage = 'Your email or password is incorrect.';
+            newInputErrors.password = true;
+            break;
+          default:
+            errorMessage = 'An unexpected error occurred. Please try again later.';
+        }
+
+        setInputErrors(newInputErrors);
+        Alert.alert('Registration Error', errorMessage, [{ text: 'OK' }]);
+        // ..
       });
   }
   

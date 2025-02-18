@@ -14,9 +14,12 @@ const RegisterPage = () => {
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [inputErrors, setInputErrors] = useState({ email: false, password: false });
 
 
   const handleSignUp = () => {
+    setInputErrors({ email: false, password: false });
+
     auth
     createUserWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
@@ -26,8 +29,32 @@ const RegisterPage = () => {
         // ...
       })
       .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
+        let errorMessage = '';
+        const newInputErrors = { email: false, password: false };
+
+        switch (error.code) {
+          case 'auth/invalid-email':
+            errorMessage = 'Invalid email.';
+            newInputErrors.email = true;
+            break;
+          case 'auth/missing-password':
+            errorMessage = 'Password is required.';
+            newInputErrors.password = true;
+            break;
+          case 'auth/weak-password':
+            errorMessage = 'Password should be at least 6 characters.';
+            newInputErrors.password = true;
+            break;
+          case 'auth/email-already-in-use':
+            errorMessage = 'This email is already registered. Try signing in instead.';
+            newInputErrors.email = true;
+            break;
+          default:
+            errorMessage = 'An unexpected error occurred. Please try again later.';
+        }
+
+        setInputErrors(newInputErrors);
+        Alert.alert('Registration Error', errorMessage, [{ text: 'OK' }]);
         // ..
       });
   }
@@ -48,7 +75,8 @@ const RegisterPage = () => {
           </View>
           <View style={styles.inputContainer}>
             <InputCompo text='Enter your name' />
-            <InputCompo text='Enter your email'  curValue={email} curChange={(text) => setEmail(text)} />
+            <InputCompo text='Enter your email'  curValue={email} curChange={(text) => setEmail(text)} 
+            />
             <InputCompo text='Enter password' curValue={password} curChange={(text) => setPassword(text)} />
             <InputCompo text='Confirm password' />
             <Text style={styles.agreement}>*By clicking register, you agree with the app's privary policy...</Text>
