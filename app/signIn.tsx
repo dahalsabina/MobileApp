@@ -15,7 +15,6 @@ const SigninPage = () => {
   const [inputErrors, setInputErrors] = useState({ email: false, password: false });
 
 
-
   const handleSignIn = () => {
     setInputErrors({ email: false, password: false });
 
