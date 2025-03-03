@@ -1,17 +1,30 @@
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "baseUrl": ".",  // Ensures paths are resolved relative to the root of the project
+    "jsx": "react-jsx",
+    "baseUrl": ".",  
     "strict": true,
     "paths": {
-      "@/*": ["./*"]  // Maps "@/..." to project root
+      "@/*": ["./*"]
     },
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "allowJs": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
+    "**/*.js",
+    "**/*.jsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
   ]
 }
+
+
+
+
+
+
+
