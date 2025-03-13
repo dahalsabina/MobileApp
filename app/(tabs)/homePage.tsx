@@ -8,14 +8,22 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Image,
+  TextInput,
 } from 'react-native';
-import { collection, onSnapshot, query, orderBy } from '@firebase/firestore';
-
+import { 
+  collection, 
+  onSnapshot, 
+  query, 
+  orderBy, 
+  where, 
+  addDoc, 
+  serverTimestamp, 
+  doc, 
+  updateDoc 
+} from '@firebase/firestore';
 import { db } from '../../firebaseConfig';
 import { Link } from "expo-router";
-
-
-import Ionicons from '@expo/vector-icons/Ionicons'; // or from 'react-native-vector-icons/Ionicons'
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 /**
  * Discussion type representing the structure of a discussion object.
@@ -28,6 +36,100 @@ type Discussion = {
   created_at: any;
   updated_at: any;
 };
+
+/**
+ * Comment type representing the structure of a comment.
+ */
+type Comment = {
+  id: string;
+  comment_id: string; // Add comment_id field
+  content: string;
+  user_id: string;
+  discussion_id: string;
+  created_at: any;
+};
+
+/**
+ * Comment Section Component
+ */
+const CommentSection = ({ discussionId }: { discussionId: string }) => {
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [newComment, setNewComment] = useState('');
+
+  useEffect(() => {
+    console.log("Fetching comments for discussionId:", discussionId);
+
+    const commentsQuery = query(
+      collection(db, "Comment"),
+      where("discussion_id", "==", discussionId), // ✅ Filtering by discussion_id
+      orderBy("created_at", "asc") // ✅ Ordering by created_at
+    );
+    
+
+    const unsubscribe = onSnapshot(commentsQuery, (snapshot) => {
+      const fetchedComments = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Comment[];
+      
+      console.log("Fetched Comments:", fetchedComments);
+      setComments(fetchedComments);
+    });
+
+    return () => unsubscribe();
+  }, [discussionId]);
+
+  const addComment = async () => {
+    if (newComment.trim() === '') return;
+
+    try {
+      // Step 1: Add the document to Firestore without the comment_id
+      const docRef = await addDoc(collection(db, "Comment"), {
+        content: newComment,
+        user_id: "currentUserId", // Replace with authenticated user's ID
+        discussion_id: discussionId, // ✅ Store as a string instead of a Firestore reference
+        created_at: serverTimestamp(),
+        updated_at: serverTimestamp(),
+      });
+
+      // Step 2: Update the document to include the comment_id
+      await updateDoc(doc(db, "Comment", docRef.id), {
+        comment_id: docRef.id, // Add the auto-generated ID as comment_id
+      });
+
+      console.log("Comment added with ID:", docRef.id); // Log the document ID
+      setNewComment('');
+    } catch (error) {
+      console.error("Error adding comment:", error); // Log the full error
+    }
+  };
+
+  return (
+    <View style={styles.commentSection}>
+      {comments.map((comment) => (
+        <View key={comment.id} style={styles.commentItem}>
+          <Image
+            source={{ uri: 'https://via.placeholder.com/30' }}
+            style={styles.commentUserImage}
+          />
+          <Text style={styles.commentText}>{comment.content}</Text>
+        </View>
+      ))}
+      <View style={styles.commentInputContainer}>
+        <TextInput
+          style={styles.commentInput}
+          placeholder="Write a comment..."
+          value={newComment}
+          onChangeText={setNewComment}
+        />
+        <TouchableOpacity onPress={addComment} style={styles.commentButton}>
+          <Ionicons name="send" size={20} color="#50C2C9" />
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+};
+
 
 /**
  * HomePage Component
@@ -72,10 +174,10 @@ const HomePage = () => {
   const renderDiscussion = ({ item }: { item: Discussion }) => (
     <View style={styles.discussionItem}>
       <View style={styles.userRow}>
-        <Image
+        {/* <Image
           source={{ uri: 'https://via.placeholder.com/40' }} // Replace with actual user profile image
           style={styles.userImage}
-        />
+        /> */}
         <Text style={styles.username}>John Blender</Text>
       </View>
 
@@ -92,34 +194,22 @@ const HomePage = () => {
         <Text style={styles.discussionBody}>{item.body}</Text>
       </View>
 
+      {/* Comments Section */}
+      <CommentSection discussionId={item.id} />
+
       {/* Action Buttons (Like, Comment, Share) */}
       <View style={styles.actionsRow}>
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={() => {
-            // Handle Like functionality here
-          }}
-        >
+        <TouchableOpacity style={styles.actionButton}>
           <Ionicons name="heart-outline" size={20} color="#50C2C9" />
           <Text style={styles.actionText}>Like</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={() => {
-            // Handle Comment functionality here
-          }}
-        >
+        <TouchableOpacity style={styles.actionButton}>
           <Ionicons name="chatbubble-outline" size={20} color="#50C2C9" />
           <Text style={styles.actionText}>Comment</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={() => {
-            // Handle Share functionality here
-          }}
-        >
+        <TouchableOpacity style={styles.actionButton}>
           <Ionicons name="share-social-outline" size={20} color="#50C2C9" />
           <Text style={styles.actionText}>Share</Text>
         </TouchableOpacity>
@@ -145,6 +235,7 @@ const HomePage = () => {
     </SafeAreaView>
   );
 };
+
 
 /**
  * Styles
@@ -243,6 +334,43 @@ const styles = StyleSheet.create({
   flatListContent: {
     paddingBottom: 100,
     paddingTop: 10,
+  },commentSection: {
+    marginTop: 10,
+    paddingHorizontal: 10,
+  },
+  commentItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 5,
+  },
+  commentUserImage: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    marginRight: 8,
+  },
+  commentText: {
+    fontSize: 14,
+    color: '#555',
+  },
+  commentInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#EAEAEA',
+    paddingTop: 8,
+  },
+  commentInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#DDD',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    height: 35,
+  },
+  commentButton: {
+    marginLeft: 8,
   },
 });
 

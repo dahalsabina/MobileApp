@@ -9,7 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { collection, addDoc, serverTimestamp } from '@firebase/firestore';
+import { collection, addDoc, serverTimestamp, doc, updateDoc } from '@firebase/firestore';
 import { db } from '../../firebaseConfig';  // Import Firestore database instance
 
 const DiscussionPost = () => {
@@ -30,8 +30,8 @@ const DiscussionPost = () => {
     setLoading(true);
 
     try {
-      // Creating a Firestore document
-      await addDoc(collection(db, 'discussions'), {
+      // Add a new document to the 'discussions' collection
+      const docRef = await addDoc(collection(db, 'discussions'), {
         title: headline,
         body: notes,
         user_id: 'sample-user-id',  // Replace with actual user ID if available
@@ -39,11 +39,17 @@ const DiscussionPost = () => {
         updated_at: serverTimestamp(),
       });
 
+      // Update the document to include its own auto-generated ID
+      await updateDoc(doc(db, 'discussions', docRef.id), {
+        discussion_id: docRef.id,  // Add the auto-generated ID as a field
+      });
+
       Alert.alert('Success', 'Discussion added successfully!');
       setHeadline('');
       setNotes('');
       router.replace('/(tabs)/homePage');  // Navigate back to home page
     } catch (err) {
+      console.error('Error adding discussion: ', err);
       Alert.alert('Error', err instanceof Error ? err.message : 'An unknown error occurred');
     } finally {
       setLoading(false);
