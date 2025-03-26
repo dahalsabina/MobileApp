@@ -5,6 +5,7 @@ import PostCardCompo from '../../components/PostCardCompo';
 const Profile = () => {
   return (
     <View style={styles.container}>
+      <text>Profile</text>
       <PostCardCompo
         username="John Blender"
         content="This is a crazily nice day and I am the coolest minion💁🏻‍♀️"

@@ -24,7 +24,7 @@ export function PostCardCompo ({ username, content, imageSource, likes, comments
         <Text style={styles.username}>{username}</Text>
       </View>
       <Text style={styles.content}>{content}</Text>
-      <Image source={imageSource} style={styles.image} />
+      <Image source={imageSource} style={styles.postImage} />
       <View style={styles.footer}>
         <View style={styles.likeContainer}>
           <Image source={replyIcon} style={styles.eachIcon} />
@@ -49,8 +49,8 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderRadius: 8,
     padding: 16,
-    maxWidth: 400,
-    margin: 16,
+    maxWidth: 359,
+    margin: 8,
   },
   header: {
     flexDirection: 'row',
@@ -58,11 +58,11 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   avatar: {
-    width: 40,
-    height: 40,
+    width: 22,
+    height: 22,
     borderRadius: 20,
     backgroundColor: '#ddd',
-    marginRight: 8,
+    marginRight: 6,
   },
   avatarImage: {
     width: '100%',
@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
   content: {
     marginBottom: 8,
   },
-  image: {
+  postImage: {
     width: 335,
     height: 146,
     borderRadius: 8,
