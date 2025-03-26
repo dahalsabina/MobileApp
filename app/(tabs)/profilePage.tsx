@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import PostCardCompo from '../../components/PostCardCompo';
+
 import postIcon from '../../assets/project_images/post.png'
 import profileIcon from '../../assets/project_images/profile.png'
 import exploreIcon from '../../assets/project_images/explore.png'
@@ -91,7 +92,7 @@ const Profile = () => {
       </ScrollView>
 
       {/* Bottom Navigation Bar */}
-      <View style={styles.bottomNav}>
+      {/* <View style={styles.bottomNav}>
         <TouchableOpacity style={styles.navButton}>
           <Image source={homeIcon} style={styles.navImageIconHome} />
         </TouchableOpacity>
@@ -104,7 +105,7 @@ const Profile = () => {
         <TouchableOpacity style={styles.navButton}>
         <Image source={profileIcon} style={styles.navImageIconProfile} />
         </TouchableOpacity>
-      </View>
+      </View> */}
     </SafeAreaView>
   );
 };

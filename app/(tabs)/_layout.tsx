@@ -2,7 +2,13 @@ import { AntDesign, Entypo, Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import Colors from "@/constants/Colors";
 import React from "react";
-import { useColorScheme } from "react-native";
+import { useColorScheme, Image, StyleSheet } from "react-native";
+
+const postIcon = require('../../assets/project_images/post.png');
+const profileIcon = require('../../assets/project_images/profile.png')
+const exploreIcon = require('../../assets/project_images/explore.png')
+const homeIcon = require('../../assets/project_images/home.png')
+
 
 /**
  * Page component renders a tab-based navigation layout for the app.
@@ -32,26 +38,22 @@ export default function Page() {
                 // Set active tab color based on theme's primary color
                 tabBarActiveTintColor: Colors[theme].primary,
                 // Customize the tab bar's appearance
-                tabBarStyle: {
-                    backgroundColor: "#f4f4f4",
-                    borderTopWidth: 0,
-                },
+                tabBarStyle: styles.tabBarStyle,
             }}
         >
             {/* Home Tab */}
             <Tabs.Screen
                 name="homePage"
                 options={{
-                    tabBarLabel: "Home",
+                    tabBarLabel: "",
                     /**
                      * Render the Home icon for the tab bar.
                      * @param {Object} param - Props passed to the icon.
                      * @param {string} param.color - The color for the icon.
                      * @returns {JSX.Element} Home icon component.
                      */
-                    tabBarIcon: ({ color }) => (
-                        <Ionicons name="home" size={24} color="#777" />
-                    ),
+                    tabBarIcon: () => (
+                        <Image source={homeIcon} style={styles.navImageIconHome} />)
                 }}
             />
 
@@ -59,15 +61,15 @@ export default function Page() {
             <Tabs.Screen
                 name="explore"
                 options={{
-                    tabBarLabel: "Explore",
+                    tabBarLabel: "",
                     /**
                      * Render the Explore icon for the tab bar.
                      * @param {Object} param - Props passed to the icon.
                      * @param {string} param.color - The color for the icon.
                      * @returns {JSX.Element} Explore icon component.
                      */
-                    tabBarIcon: ({ color }) => (
-                        <Entypo name="open-book" size={24} color={color} />
+                    tabBarIcon: () => (
+                        <Image source={exploreIcon} style={styles.navImageIconExplore} />
                     ),
                 }}
             />
@@ -83,46 +85,77 @@ export default function Page() {
                      * @param {string} param.color - The color for the icon.
                      * @returns {JSX.Element} Add Post icon component.
                      */
-                    tabBarIcon: ({ color }) => (
-                        <AntDesign name="pluscircle" size={24} color={color} />
+                    tabBarIcon: () => (
+                        <Image source={postIcon} style={styles.navImageIconPost} />
                     ),
                 }}
             />
 
             {/* Profile Tab */}
             <Tabs.Screen
-                name="profile"
+                name="profilePage"
                 options={{
-                    tabBarLabel: "Profile",
+                    tabBarLabel: "",
                     /**
                      * Render the Profile icon for the tab bar.
                      * @param {Object} param - Props passed to the icon.
                      * @param {string} param.color - The color for the icon.
                      * @returns {JSX.Element} Profile icon component.
                      */
-                    tabBarIcon: ({ color }) => (
-                        <Entypo name="user" size={24} color={color} />
+                    tabBarIcon: () => (
+                        <Image source={profileIcon} style={styles.navImageIconProfile} />
                     ),
                 }}
             />
 
             {/* Notification Tab */}
-            <Tabs.Screen
+            {/* <Tabs.Screen
                 name="notification"
                 options={{
-                    tabBarLabel: "Notification",
-                    /**
-                     * Render the Notification icon for the tab bar.
-                     * @param {Object} param - Props passed to the icon.
-                     * @param {string} param.color - The color for the icon.
-                     * @returns {JSX.Element} Notification icon component.
-                     */
+                    tabBarLabel: "",
                     tabBarIcon: ({ color }) => (
                         <Entypo name="bell" size={24} color={color} />
                     ),
                 }}
-            />
+            /> */}
         </Tabs>
     );
 }
+
+const styles = StyleSheet.create({
+    tabBarStyle : {
+        backgroundColor: "#50C2C9",
+        // borderTopWidth: 0,
+        // bottom: 0,
+        height: 40,
+        padding: 8,
+        flexDirection: "row",
+        justifyContent: "space-between",
+        // alignItems: "center",
+    },
+    navImageIconHome: {
+        width: 25, 
+        height: 19.4, 
+        marginTop: 22,
+        marginLeft: 29
+      },
+      navImageIconPost: {
+        width: 21.875, 
+        height: 21.875, 
+        marginTop: 22,
+        marginLeft: 83,
+      },
+      navImageIconExplore: {
+        width: 16,
+        height: 25,
+        marginTop: 22,
+        marginLeft: 83,
+      },
+      navImageIconProfile: {
+        width: 24.2, 
+        height: 24.2, 
+        marginTop: 22,
+        marginLeft: 83,
+      },
+});
 
