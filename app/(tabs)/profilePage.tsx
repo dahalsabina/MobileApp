@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
   },
   twoCirclesBackground: {
     position: 'absolute',
-    zIndex: 1, 
+    // zIndex: 1, 
   },
   header: {
     backgroundColor: '#50C2C9',
