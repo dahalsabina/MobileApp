@@ -72,10 +72,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     padding: 20,
   },
-  twoCirclesBackground: {
-    position: 'absolute',
-    zIndex: 1, 
-  },
   parachuteContainer: {
     marginTop: 40,
   },
