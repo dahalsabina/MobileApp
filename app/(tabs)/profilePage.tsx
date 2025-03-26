@@ -38,8 +38,8 @@ const Profile = () => {
       // todo: pull from database the images
       image: '',
       shares: 3,
-      comments: 20000,
-      likes: 30500,
+      comments: 20,
+      likes: 321,
     },
     {
       id: '2',
@@ -48,17 +48,20 @@ const Profile = () => {
       // todo: pull from database the images
       image: '',
       shares: 3,
-      comments: 20000,
-      likes: 30500,
+      comments: 20,
+      likes: 321,
     },
   ];
 
   return (
     <SafeAreaView style={styles.container}>
+      <Image 
+        source={require("@/assets/project_images/shape.png")}
+        style={styles.twoCirclesBackground}
+      />
       <StatusBar barStyle="dark-content" backgroundColor="#000" />
       {/* Header Section */}
       <View style={styles.header}>
-        <View style={styles.circleBackground} />
         <Image
           source={require('../../assets/project_images/profile_minions.jpg')} 
           style={styles.profileImage}
@@ -111,6 +114,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#50C2C9',
   },
+  twoCirclesBackground: {
+    position: 'absolute',
+    zIndex: 1, 
+  },
   header: {
     backgroundColor: '#50C2C9',
     height: 150,
@@ -119,27 +126,17 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
   },
-  circleBackground: {
-    position: 'absolute',
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    backgroundColor: '#C7F2ED70',
-    top: -100,
-    left: -50,
-    opacity: 0.5,
-  },
   profileImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    borderWidth: 2,
-    borderColor: '#fff',
+    width: 60,
+    height: 60,
+    borderRadius: 50,
+    // borderWidth: 1,
+    // borderColor: '#50C2C9',
   },
   welcomeText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#fff',
+    fontSize: 17,
+    // fontWeight: 'bold',
+    color: '#FFFFFF',
     marginTop: 10,
   },
   scrollView: {

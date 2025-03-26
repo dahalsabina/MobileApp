@@ -59,7 +59,7 @@ const App = () => {
       </View>
 
       {/* Get Started Button */}
-      <ButtonCompo onPress={() => router.push("./profile3")} text='Register'></ButtonCompo>
+      <ButtonCompo onPress={() => router.push("./profilePage")} text='Register'></ButtonCompo>
     </SafeAreaView>
   );
 };
