@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, StatusBar, TouchableOpacity, Text, SafeAreaView, ScrollView, } from 'react-native';
 import PostCardCompo from '../../components/PostCardCompo';
+
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '@/firebaseConfig'; // Ensure your Firestore instance is imported
 
 // Define types for the post data
 interface Post {
@@ -15,30 +18,43 @@ interface Post {
 
 const home = () => {
   const [activeTab, setActiveTab] = useState('Follow');
+  const [discussions, setDiscussions] = useState<any[]>([]); 
 
-  // Sample post data
-  const posts: Post[] = [
-    {
-      id: '1',
-      username: 'John Blender',
-      content: 'This is a crazly nice day with all the people coming over to see this event.',
-      // todo: pull from database the images
-      image: '',
-      shares: 3,
-      comments: 20,
-      likes: 321,
-    },
-    {
-      id: '2',
-      username: 'John Blender',
-      content: 'This is a crazly nice day with all the people coming over to see this event.',
-      // todo: pull from database the images
-      image: '',
-      shares: 3,
-      comments: 20,
-      likes: 321,
-    },
-  ];
+  useEffect(() => {
+    const fetchDiscussions = async () => {
+      try {
+        // Reference the Firestore collection
+        const discussionsRef = collection(db, 'discussions');
+  
+        // Fetch all discussions without filtering
+        const querySnapshot = await getDocs(discussionsRef);
+  
+        const allDiscussions = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+  
+        setDiscussions(allDiscussions);
+  
+        // Log the discussions to the console
+        // console.log('Fetched discussions:', allDiscussions);
+      } catch (error) {
+        console.error('Error fetching discussions:', error);
+      }
+    };
+  
+    fetchDiscussions();
+  }, []);
+
+  const posts: Post[] = discussions.map((discussion) => ({
+    id: discussion.id,
+    username: discussion.user_id, // default using user_id
+    content: discussion.body,
+    image: '', // default
+    shares: 0, 
+    comments: 0, 
+    likes: discussion.likes_count,
+  }));
 
   return (
     <SafeAreaView style={styles.container}>
