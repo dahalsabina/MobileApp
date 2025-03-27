@@ -44,7 +44,7 @@ export default function Page() {
         >
             {/* Home Tab */}
             <Tabs.Screen
-                name="homePage"
+                name="home"
                 options={{
                     tabBarLabel: "",
                     /**

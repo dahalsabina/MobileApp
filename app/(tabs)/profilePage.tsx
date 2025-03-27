@@ -51,7 +51,7 @@ const Profile = () => {
           const fetchedUserId = userDoc.data().user_id;
           setUserId(fetchedUserId);
           // Log the user ID to the console
-          console.log('Fetched user ID:', fetchedUserId);
+          // console.log('Fetched user ID:', fetchedUserId);
 
           // Fetch discussions for the user
           fetchDiscussions(fetchedUserId);
@@ -80,7 +80,7 @@ const Profile = () => {
         setDiscussions(userDiscussions);
 
         // Log the discussions to the console
-        console.log('Fetched discussions:', userDiscussions);
+        // console.log('Fetched discussions:', userDiscussions);
       } catch (error) {
         console.error('Error fetching discussions:', error);
       }
