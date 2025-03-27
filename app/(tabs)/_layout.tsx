@@ -77,7 +77,7 @@ export default function Page() {
 
             {/* Discussion Post Tab */}
             <Tabs.Screen
-                name="discussionPost"
+                name="post"
                 options={{
                     tabBarLabel: "",
                     /**
