@@ -127,7 +127,6 @@ const styles = StyleSheet.create({
   activeTab: {
     borderBottomWidth: 2,
     borderBottomColor: 'white', // White underline for active tab
-    
   },
   tabText: {
     color: 'white',
@@ -136,15 +135,6 @@ const styles = StyleSheet.create({
   },
   activeTabText: {
     color: 'white',
-  },
-  contentArea: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  placeholderText: {
-    fontSize: 18,
-    color: '#666',
   },
   scrollView: {
     flex: 1,
