@@ -2,13 +2,14 @@ import { AntDesign, Entypo, Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import Colors from "@/constants/Colors";
 import React from "react";
-import { useColorScheme, Image, StyleSheet } from "react-native";
+import { useColorScheme, Image, StyleSheet, Dimensions } from "react-native"; // Import Dimensions
 
 const postIcon = require('../../assets/project_images/post.png');
 const profileIcon = require('../../assets/project_images/profile.png')
 const exploreIcon = require('../../assets/project_images/explore.png')
 const homeIcon = require('../../assets/project_images/home.png')
 
+const screenWidth = Dimensions.get("window").width; // Get screen width
 
 /**
  * Page component renders a tab-based navigation layout for the app.
@@ -123,39 +124,30 @@ export default function Page() {
 }
 
 const styles = StyleSheet.create({
-    tabBarStyle : {
+    tabBarStyle: {
         backgroundColor: "#50C2C9",
-        // borderTopWidth: 0,
-        // bottom: 0,
         height: 60,
-        padding: 8,
+        paddingHorizontal: 16, // Add 16px padding on both sides
         flexDirection: "row",
-        justifyContent: "space-between",
-        // alignItems: "center",
+        justifyContent: "space-between", // Evenly space icons
+        alignItems: "center", // Center icons vertically
+        paddingTop: 20,
     },
     navImageIconHome: {
-        width: 25, 
-        height: 19.4, 
-        marginTop: 22,
-        marginLeft: 29
-      },
-      navImageIconPost: {
-        width: 21.875, 
-        height: 21.875, 
-        marginTop: 22,
-        marginLeft: 83,
-      },
-      navImageIconExplore: {
+        width: 25,
+        height: 19.4,
+    },
+    navImageIconPost: {
+        width: 21.875,
+        height: 21.875,
+    },
+    navImageIconExplore: {
         width: 16,
         height: 25,
-        marginTop: 22,
-        marginLeft: 83,
-      },
-      navImageIconProfile: {
-        width: 24.2, 
-        height: 24.2, 
-        marginTop: 22,
-        marginLeft: 83,
-      },
+    },
+    navImageIconProfile: {
+        width: 24.2,
+        height: 24.2,
+    },
 });
 
