@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -10,11 +10,9 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import PostCardCompo from '../../components/PostCardCompo';
-
-import postIcon from '../../assets/project_images/post.png'
-import profileIcon from '../../assets/project_images/profile.png'
-import exploreIcon from '../../assets/project_images/explore.png'
-import homeIcon from '../../assets/project_images/home.png'
+import { useLocalSearchParams } from 'expo-router';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '@/firebaseConfig'; // Ensure your Firestore instance is imported
 
 
 
@@ -30,6 +28,67 @@ interface Post {
 }
 
 const Profile = () => {
+  const { email } = useLocalSearchParams();
+
+  const [userId, setUserId] = useState<string | null>(null);
+  const [discussions, setDiscussions] = useState<any[]>([]); // State to store discussions
+
+  useEffect(() => {
+    const fetchUserId = async () => {
+      try {
+        if (!email) return;
+
+        // Reference the Firestore collection
+        const usersRef = collection(db, 'users');
+
+        // Query Firestore for the document with the matching email
+        const q = query(usersRef, where('user_email', '==', email));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+          // Assuming there's only one document per email
+          const userDoc = querySnapshot.docs[0];
+          const fetchedUserId = userDoc.data().user_id;
+          setUserId(fetchedUserId);
+          // Log the user ID to the console
+          console.log('Fetched user ID:', fetchedUserId);
+
+          // Fetch discussions for the user
+          fetchDiscussions(fetchedUserId);
+        } else {
+          console.log('No user found with the provided email.');
+        }
+      } catch (error) {
+        console.error('Error fetching user ID:', error);
+      }
+    };
+
+    const fetchDiscussions = async (userId: string) => {
+      try {
+        // Reference the Firestore collection
+        const discussionsRef = collection(db, 'discussions');
+
+        // Query Firestore for discussions with the matching user_id
+        const q = query(discussionsRef, where('user_id', '==', userId));
+        const querySnapshot = await getDocs(q);
+
+        const userDiscussions = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        setDiscussions(userDiscussions);
+
+        // Log the discussions to the console
+        console.log('Fetched discussions:', userDiscussions);
+      } catch (error) {
+        console.error('Error fetching discussions:', error);
+      }
+    };
+
+    fetchUserId();
+  }, [email]);
+
   // Sample post data
   const posts: Post[] = [
     {
@@ -68,6 +127,7 @@ const Profile = () => {
           style={styles.profileImage}
         />
         <Text style={styles.welcomeText}>Welcome John Blender</Text>
+        <Text>{email}</Text>
       </View>
 
       {/* Post List */}
@@ -90,22 +150,6 @@ const Profile = () => {
           />
         ))}
       </ScrollView>
-
-      {/* Bottom Navigation Bar */}
-      {/* <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navButton}>
-          <Image source={homeIcon} style={styles.navImageIconHome} />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navButton}>
-        <Image source={postIcon} style={styles.navImageIconPost} />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navButton}>
-        <Image source={exploreIcon} style={styles.navImageIconExplore} />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navButton}>
-        <Image source={profileIcon} style={styles.navImageIconProfile} />
-        </TouchableOpacity>
-      </View> */}
     </SafeAreaView>
   );
 };
@@ -143,33 +187,6 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
     backgroundColor: '#D9D9D9',
-  },
-  bottomNav: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    backgroundColor: '#50C2C9',
-    // paddingVertical: 10,
-    // borderTopLeftRadius: 20,
-    // borderTopRightRadius: 20,
-  },
-  navButton: {
-    padding: 10,
-  },
-  navImageIconHome: {
-    width: 25, // Adjust width for image icons
-    height: 19.4, // Adjust height for image icons
-  },
-  navImageIconPost: {
-    width: 21.875, // Adjust width for image icons
-    height: 21.875, // Adjust height for image icons
-  },
-  navImageIconExplore: {
-    width: 16, // Adjust width for image icons
-    height: 25, // Adjust height for image icons
-  },
-  navImageIconProfile: {
-    width: 24.2, // Adjust width for image icons
-    height: 24.2, // Adjust height for image icons
   },
 });
 

@@ -24,7 +24,10 @@ const SigninPage = () => {
         // Signed in 
         const user = userCredential.user;
         console.log(user.email)
-        router.push("./homePage")
+        router.push({
+          pathname: "./profilePage",
+          params: { email: user.email },
+        });
         // ...
       })
       .catch((error) => {
