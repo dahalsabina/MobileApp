@@ -31,7 +31,7 @@ const Profile = () => {
   const { email } = useLocalSearchParams();
 
   const [userId, setUserId] = useState<string | null>(null);
-  const [discussions, setDiscussions] = useState<any[]>([]); // State to store discussions
+  const [discussions, setDiscussions] = useState<any[]>([]); 
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -89,29 +89,16 @@ const Profile = () => {
     fetchUserId();
   }, [email]);
 
-  // Sample post data
-  const posts: Post[] = [
-    {
-      id: '1',
-      username: 'John Blender',
-      content: 'This is a crazly nice day with all the people coming over to see this event.',
-      // todo: pull from database the images
-      image: '',
-      shares: 3,
-      comments: 20,
-      likes: 321,
-    },
-    {
-      id: '2',
-      username: 'John Blender',
-      content: 'This is a crazly nice day with all the people coming over to see this event.',
-      // todo: pull from database the images
-      image: '',
-      shares: 3,
-      comments: 20,
-      likes: 321,
-    },
-  ];
+  // Transform discussions into posts
+const posts: Post[] = discussions.map((discussion) => ({
+  id: discussion.id,
+  username: discussion.user_id, // default using user_id
+  content: discussion.body,
+  image: '', // default
+  shares: 0, 
+  comments: 0, 
+  likes: discussion.likes_count,
+}));
 
   return (
     <SafeAreaView style={styles.container}>
@@ -126,8 +113,7 @@ const Profile = () => {
           source={require('../../assets/project_images/profile_minions.jpg')} 
           style={styles.profileImage}
         />
-        <Text style={styles.welcomeText}>Welcome John Blender</Text>
-        <Text>{email}</Text>
+        <Text style={styles.welcomeText}>Welcome {userId}</Text>
       </View>
 
       {/* Post List */}
