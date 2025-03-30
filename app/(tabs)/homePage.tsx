@@ -19,7 +19,10 @@ import {
   addDoc, 
   serverTimestamp, 
   doc, 
-  updateDoc 
+  updateDoc,
+  getDocs,
+  deleteDoc,
+  increment
 } from '@firebase/firestore';
 import { db } from '../../firebaseConfig';
 import { Link } from "expo-router";
@@ -35,6 +38,7 @@ type Discussion = {
   user_id: string;
   created_at: any;
   updated_at: any;
+  likes_count: number; // Add likes_count field
 };
 
 /**
@@ -130,6 +134,145 @@ const CommentSection = ({ discussionId }: { discussionId: string }) => {
   );
 };
 
+/**
+ * Discussion Item Component
+ */
+const DiscussionItem = ({ item }: { item: Discussion }) => {
+  const [isLiked, setIsLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(item.likes_count || 0);
+
+  useEffect(() => {
+    // Check if the current user has liked the discussion
+    const checkIfLiked = async () => {
+      const likeQuery = query(
+        collection(db, "likes"),
+        where("user_id", "==", "currentUserId"), // Replace with actual user ID
+        where("discussion_id", "==", item.id)
+      );
+
+      const querySnapshot = await getDocs(likeQuery);
+      setIsLiked(!querySnapshot.empty);
+    };
+
+    checkIfLiked();
+  }, [item.id]);
+
+  const onLikePress = async () => {
+    await handleLike(item.id, "currentUserId"); // Replace with actual user ID
+    setIsLiked(!isLiked); // Toggle the like state
+    setLikesCount(isLiked ? likesCount - 1 : likesCount + 1); // Update likes count
+  };
+
+  const handleLike = async (discussionId: string, userId: string) => {
+    try {
+      // Check if the user has already liked the discussion
+      const likeQuery = query(
+        collection(db, "likes"),
+        where("user_id", "==", userId),
+        where("discussion_id", "==", discussionId)
+      );
+
+      const querySnapshot = await getDocs(likeQuery);
+
+      if (querySnapshot.empty) {
+        // If the user hasn't liked the discussion, add a like
+        await addDoc(collection(db, "likes"), {
+          user_id: userId,
+          discussion_id: discussionId,
+          liked: true, // Add liked field
+          created_at: serverTimestamp(),
+        });
+
+        // Increment the likes_count in the discussions collection
+        const discussionRef = doc(db, "discussions", discussionId);
+        await updateDoc(discussionRef, {
+          likes_count: increment(1), // Increment likes_count by 1
+        });
+
+        console.log("Discussion liked!");
+      } else {
+        // If the user has already liked the discussion, remove the like
+        const likeId = querySnapshot.docs[0].id;
+        await deleteDoc(doc(db, "likes", likeId));
+
+        // Decrement the likes_count in the discussions collection
+        const discussionRef = doc(db, "discussions", discussionId);
+        await updateDoc(discussionRef, {
+          likes_count: increment(-1), // Decrement likes_count by 1
+        });
+
+        console.log("Discussion unliked!");
+      }
+    } catch (error) {
+      console.error("Error handling like:", error);
+    }
+  };
+
+  return (
+    <View style={styles.discussionItem}>
+      <View style={styles.userRow}>
+        <Text style={styles.username}>John Blender</Text>
+      </View>
+
+      {/* <Link
+        href={{
+          pathname: '/[id]',
+          params: { id: item.id.toString() },
+        }}
+      >
+        <Text style={styles.clickableTitle}>{item.title}</Text>
+      </Link> */}
+
+<Link
+  href={{
+    pathname: '/[id]',
+    params: { 
+      id: item.id.toString(),
+      title: item.title,
+      body: item.body,
+      likes_count: item.likes_count,
+    },
+  }}
+>
+  <Text style={styles.clickableTitle}>{item.title}</Text>
+</Link>
+
+
+      <View style={styles.bodyContainer}>
+        <Text style={styles.discussionBody}>{item.body}</Text>
+      </View>
+
+      {/* Like Button */}
+      <TouchableOpacity 
+        style={styles.actionButton} 
+        onPress={onLikePress}
+      >
+        <Ionicons 
+          name={isLiked ? "heart" : "heart-outline"} 
+          size={20} 
+          color={isLiked ? "#FF0000" : "#50C2C9"} 
+        />
+        <Text style={styles.actionText}>{likesCount}</Text>
+      </TouchableOpacity>
+
+      {/* Comment and Share Buttons */}
+      <View style={styles.actionsRow}>
+        <TouchableOpacity style={styles.actionButton}>
+          <Ionicons name="chatbubble-outline" size={20} color="#50C2C9" />
+          <Text style={styles.actionText}>Comment</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.actionButton}>
+          <Ionicons name="share-social-outline" size={20} color="#50C2C9" />
+          <Text style={styles.actionText}>Share</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Comments Section */}
+      <CommentSection discussionId={item.id} />
+    </View>
+  );
+};
 
 /**
  * HomePage Component
@@ -153,6 +296,7 @@ const HomePage = () => {
           user_id: doc.data().user_id,
           created_at: doc.data().created_at,
           updated_at: doc.data().updated_at,
+          likes_count: doc.data().likes_count || 0, // Initialize likes_count
         }));
 
         setDiscussions(fetchedDiscussions);
@@ -168,55 +312,6 @@ const HomePage = () => {
     return () => unsubscribe();
   }, []);
 
-  /**
-   * Renders a single discussion item with navigation to `[id].tsx`
-   */
-  const renderDiscussion = ({ item }: { item: Discussion }) => (
-    <View style={styles.discussionItem}>
-      <View style={styles.userRow}>
-        {/* <Image
-          source={{ uri: 'https://via.placeholder.com/40' }} // Replace with actual user profile image
-          style={styles.userImage}
-        /> */}
-        <Text style={styles.username}>John Blender</Text>
-      </View>
-
-      <Link
-        href={{
-          pathname: '/[id]',
-          params: { id: item.id.toString() },
-        }}
-      >
-        <Text style={styles.clickableTitle}>{item.title}</Text>
-      </Link>
-
-      <View style={styles.bodyContainer}>
-        <Text style={styles.discussionBody}>{item.body}</Text>
-      </View>
-
-      {/* Comments Section */}
-      <CommentSection discussionId={item.id} />
-
-      {/* Action Buttons (Like, Comment, Share) */}
-      <View style={styles.actionsRow}>
-        <TouchableOpacity style={styles.actionButton}>
-          <Ionicons name="heart-outline" size={20} color="#50C2C9" />
-          <Text style={styles.actionText}>Like</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.actionButton}>
-          <Ionicons name="chatbubble-outline" size={20} color="#50C2C9" />
-          <Text style={styles.actionText}>Comment</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.actionButton}>
-          <Ionicons name="share-social-outline" size={20} color="#50C2C9" />
-          <Text style={styles.actionText}>Share</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -228,14 +323,13 @@ const HomePage = () => {
 
       <FlatList
         data={discussions}
-        renderItem={renderDiscussion}
+        renderItem={({ item }) => <DiscussionItem item={item} />}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.flatListContent}
       />
     </SafeAreaView>
   );
 };
-
 
 /**
  * Styles
@@ -334,7 +428,8 @@ const styles = StyleSheet.create({
   flatListContent: {
     paddingBottom: 100,
     paddingTop: 10,
-  },commentSection: {
+  },
+  commentSection: {
     marginTop: 10,
     paddingHorizontal: 10,
   },
