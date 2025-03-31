@@ -9,8 +9,15 @@ import {
   Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { collection, addDoc, serverTimestamp } from '@firebase/firestore';
-import { db } from '../../firebaseConfig';  // Import Firestore instance
+import {
+  collection,
+  addDoc,
+  serverTimestamp,
+  getDocs,
+  query,
+  where,
+} from '@firebase/firestore';
+import { db, auth } from '../../firebaseConfig'; // Import Firestore & Auth
 
 const DiscussionPost = () => {
   const [headline, setHeadline] = useState<string>('');
@@ -30,12 +37,33 @@ const DiscussionPost = () => {
     setLoading(true);
 
     try {
-      // Add a new document to the 'discussions' collection
+      // Ensure the user is signed in
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        Alert.alert('Error', 'No user is currently signed in.');
+        setLoading(false);
+        return;
+      }
+
+      // Fetch the user's name from the 'users' collection
+      let userName = 'Anonymous'; // Fallback if not found
+      const usersRef = collection(db, 'users');
+      // You can match by user_id (UID) or user_email. Below matches by email:
+      const q = query(usersRef, where('user_email', '==', currentUser.email));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        const userDoc = querySnapshot.docs[0];
+        userName = userDoc.data().name || 'Anonymous';
+      }
+
+      // Now create the discussion document in Firestore
       await addDoc(collection(db, 'discussions'), {
         title: headline,
         body: notes,
-        user_id: 'sadie_adler',  // Replace with actual user ID if using auth
-        likes_count: 0,          // Default like count
+        user_id: currentUser.uid, // store the UID for reference
+        user_name: userName,      // store the name from the 'users' collection
+        likes_count: 0,
         created_at: serverTimestamp(),
         updated_at: serverTimestamp(),
       });
@@ -43,10 +71,14 @@ const DiscussionPost = () => {
       Alert.alert('Success', 'Discussion added successfully!');
       setHeadline('');
       setNotes('');
-      router.replace('/(tabs)/home');  // Navigate back to home screen
+      // Navigate back to home screen (adjust path as needed)
+      router.replace('/(tabs)/home');
     } catch (err) {
       console.error('Error adding discussion: ', err);
-      Alert.alert('Error', err instanceof Error ? err.message : 'An unknown error occurred');
+      Alert.alert(
+        'Error',
+        err instanceof Error ? err.message : 'An unknown error occurred'
+      );
     } finally {
       setLoading(false);
     }
@@ -124,3 +156,4 @@ const styles = StyleSheet.create({
 });
 
 export default DiscussionPost;
+

@@ -14,8 +14,6 @@ import { useLocalSearchParams } from 'expo-router';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/firebaseConfig'; // Ensure your Firestore instance is imported
 
-
-
 // Define types for the post data
 interface Post {
   id: string;
@@ -31,14 +29,15 @@ const Profile = () => {
   const { email } = useLocalSearchParams();
 
   const [userId, setUserId] = useState<string | null>(null);
-  const [discussions, setDiscussions] = useState<any[]>([]); 
+  const [userName, setUserName] = useState<string | null>(null);
+  const [discussions, setDiscussions] = useState<any[]>([]);
 
   useEffect(() => {
-    const fetchUserId = async () => {
+    const fetchUserData = async () => {
       try {
         if (!email) return;
 
-        // Reference the Firestore collection
+        // Reference the Firestore collection for users
         const usersRef = collection(db, 'users');
 
         // Query Firestore for the document with the matching email
@@ -49,9 +48,9 @@ const Profile = () => {
           // Assuming there's only one document per email
           const userDoc = querySnapshot.docs[0];
           const fetchedUserId = userDoc.data().user_id;
+          const fetchedUserName = userDoc.data().name; // Get the user's name
           setUserId(fetchedUserId);
-          // Log the user ID to the console
-          // console.log('Fetched user ID:', fetchedUserId);
+          setUserName(fetchedUserName);
 
           // Fetch discussions for the user
           fetchDiscussions(fetchedUserId);
@@ -59,13 +58,13 @@ const Profile = () => {
           console.log('No user found with the provided email.');
         }
       } catch (error) {
-        console.error('Error fetching user ID:', error);
+        console.error('Error fetching user data:', error);
       }
     };
 
     const fetchDiscussions = async (userId: string) => {
       try {
-        // Reference the Firestore collection
+        // Reference the Firestore collection for discussions
         const discussionsRef = collection(db, 'discussions');
 
         // Query Firestore for discussions with the matching user_id
@@ -78,27 +77,24 @@ const Profile = () => {
         }));
 
         setDiscussions(userDiscussions);
-
-        // Log the discussions to the console
-        // console.log('Fetched discussions:', userDiscussions);
       } catch (error) {
         console.error('Error fetching discussions:', error);
       }
     };
 
-    fetchUserId();
+    fetchUserData();
   }, [email]);
 
   // Transform discussions into posts
-const posts: Post[] = discussions.map((discussion) => ({
-  id: discussion.id,
-  username: discussion.user_id, // default using user_id
-  content: discussion.body,
-  image: '', // default
-  shares: 0, 
-  comments: 0, 
-  likes: discussion.likes_count,
-}));
+  const posts: Post[] = discussions.map((discussion) => ({
+    id: discussion.id,
+    username: discussion.user_id, // this field could also be replaced with the user's name if stored in discussion
+    content: discussion.body,
+    image: '', // default placeholder
+    shares: 0,
+    comments: 0,
+    likes: discussion.likes_count,
+  }));
 
   return (
     <SafeAreaView style={styles.container}>
@@ -110,16 +106,19 @@ const posts: Post[] = discussions.map((discussion) => ({
       {/* Header Section */}
       <View style={styles.header}>
         <Image
-          source={require('../../assets/project_images/profile_minions.jpg')} 
+          source={require('../../assets/project_images/profile_minions.jpg')}
           style={styles.profileImage}
         />
-        <Text style={styles.welcomeText}>Welcome {userId}</Text>
+        <Text style={styles.welcomeText}>
+          Welcome {userName || 'User'}
+        </Text>
       </View>
 
       {/* Post List */}
       <ScrollView style={styles.scrollView}>
         {posts.map((post) => (
           <PostCardCompo
+            key={post.id}
             username={post.username}
             content={post.content}
             imageSource={
@@ -127,9 +126,11 @@ const posts: Post[] = discussions.map((discussion) => ({
                 ? { uri: post.image }
                 : require('../../assets/project_images/profile_minions.jpg')
             }
-            profileImageSource={post.image.startsWith('http')
-              ? { uri: post.image }
-              : require('../../assets/project_images/profile_minions.jpg')}
+            profileImageSource={
+              post.image.startsWith('http')
+                ? { uri: post.image }
+                : require('../../assets/project_images/profile_minions.jpg')
+            }
             likes={post.likes}
             comments={post.comments}
             shares={post.shares}
@@ -147,7 +148,7 @@ const styles = StyleSheet.create({
   },
   twoCirclesBackground: {
     position: 'absolute',
-    zIndex: 1, 
+    zIndex: 1,
   },
   header: {
     backgroundColor: '#50C2C9',
@@ -161,12 +162,9 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 50,
-    // borderWidth: 1,
-    // borderColor: '#50C2C9',
   },
   welcomeText: {
     fontSize: 17,
-    // fontWeight: 'bold',
     color: '#FFFFFF',
     marginTop: 10,
   },
