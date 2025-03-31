@@ -32,15 +32,15 @@ export function PostCardCompo ({ username, content, imageSource, likes, comments
       <View style={styles.footer}>
         <View style={styles.likeContainer}>
           <Image source={replyIcon} style={styles.eachIcon} />
-          <Text>{likes}</Text>
+          <Text>{shares}</Text> // add click
         </View>
         <View style={styles.likeContainer}>
           <Image source={commentIcon} style={styles.eachIcon} />
-          <Text>{likes}</Text>
+          <Text>{comments}</Text> // add click
         </View>
         <View style={styles.likeContainer}>
           <Image source={likeIcon} style={styles.eachIcon} />
-          <Text>{likes}</Text>
+          <Text>{likes}</Text> // add click
         </View>
       </View>
     </View>
