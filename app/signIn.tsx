@@ -1,7 +1,14 @@
-import{ ButtonCompo }from '@/components/ButtonCompo';
-import{ InputCompo }from '@/components/InputCompo';
+import { ButtonCompo } from '@/components/ButtonCompo';
+import { InputCompo } from '@/components/InputCompo';
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Alert,
+  Image,
+  TouchableOpacity,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { signInWithEmailAndPassword } from 'firebase/auth';
@@ -10,22 +17,28 @@ import { auth } from '@/firebaseConfig';
 const SigninPage = () => {
   const router = useRouter();
 
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [inputErrors, setInputErrors] = useState({ email: false, password: false });
-
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [inputErrors, setInputErrors] = useState({
+    email: false,
+    password: false,
+  });
 
   const handleSignIn = () => {
+    // Reset any previous errors
     setInputErrors({ email: false, password: false });
 
-    auth
+    // Sign in with Firebase Auth
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
-        // Signed in 
         const user = userCredential.user;
-        console.log(user.email)
-        router.push("./homePage")
-        // ...
+        console.log('Signed in as:', user.email);
+
+        // Navigate to profile page, passing the user’s email as a param
+        router.push({
+          pathname: './profilePage',
+          params: { email: user.email },
+        });
       })
       .catch((error) => {
         let errorMessage = '';
@@ -33,61 +46,84 @@ const SigninPage = () => {
 
         switch (error.code) {
           case 'auth/invalid-email':
-            errorMessage = 'Invalid email.';
+            errorMessage = 'Invalid email format.';
             newInputErrors.email = true;
             break;
+
           case 'auth/missing-password':
             errorMessage = 'Password is required.';
             newInputErrors.password = true;
             break;
-          case 'auth/invalid-credential':
+
+          case 'auth/user-not-found':
+          case 'auth/wrong-password':
+            // Combine both into a single error message
             errorMessage = 'Your email or password is incorrect.';
             newInputErrors.password = true;
             break;
+
+          case 'auth/too-many-requests':
+            errorMessage =
+              'Too many failed attempts. Please try again later or reset your password.';
+            newInputErrors.password = true;
+            break;
+
           default:
-            errorMessage = 'An unexpected error occurred. Please try again later.';
+            errorMessage =
+              'An unexpected error occurred. Please try again later.';
         }
 
         setInputErrors(newInputErrors);
-        Alert.alert('Registration Error', errorMessage, [{ text: 'OK' }]);
-        // ..
+        Alert.alert('Sign In Error', errorMessage, [{ text: 'OK' }]);
       });
-  }
-  
+  };
 
   return (
     <View>
-      <Image 
-          source={require("@/assets/project_images/shape.png")}
-          style={{position:'absolute'}}
+      <Image
+        source={require('@/assets/project_images/shape.png')}
+        style={{ position: 'absolute' }}
       />
       <SafeAreaView>
         <View style={styles.centralContainer}>
           <View>
             <Text style={styles.welcome}>Welcome back!</Text>
-            <Text style={styles.journey}>Resume your journey. </Text>
+            <Text style={styles.journey}>Resume your journey.</Text>
           </View>
+
+          {/* Example image */}
           <View>
-            <Image source={require('@/assets/project_images/image1.png')}  />
-          <View>
+            <Image source={require('@/assets/project_images/image1.png')} />
           </View>
-          </View>
+
           <View style={styles.inputContainer}>
-            <InputCompo text='Enter your email' curValue={email} curChange={(text) => setEmail(text)}/>
-            <InputCompo text='Enter password' curValue={password} curChange={(text) => setPassword(text)}/>
+            {/* Email */}
+            <InputCompo
+              text="Enter your email"
+              curValue={email}
+              curChange={(text) => setEmail(text)}
+            />
+
+            {/* Password */}
+            <InputCompo
+              text="Enter password"
+              curValue={password}
+              curChange={(text) => setPassword(text)}
+              isSecure={true} // If your InputCompo supports secure text
+            />
+
             <Text style={styles.agreement}>*Forget password</Text>
           </View>
+
           <View style={styles.register}>
-            <ButtonCompo onPress={handleSignIn} text='Sign in'>
-            </ButtonCompo>
+            <ButtonCompo onPress={handleSignIn} text="Sign in" />
           </View>
+
           <View style={styles.signinContainer}>
             <Text style={styles.haveAccount}>Don't have an account yet?</Text>
-            <TouchableOpacity
-              onPress={() => router.push("./register")}
-              activeOpacity={0.7}>
-            <Text style={styles.signup}>Sign up</Text>
-          </TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push('./register')}>
+              <Text style={styles.signup}>Sign up</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </SafeAreaView>
@@ -96,76 +132,63 @@ const SigninPage = () => {
 };
 
 const styles = StyleSheet.create({
-  centralContainer:{
+  centralContainer: {
     justifyContent: 'center',
     alignItems: 'center',
   },
-  inputContainer:{
+  inputContainer: {
     gap: 21,
     alignItems: 'center',
   },
-  journey:{
+  journey: {
     color: 'rgba(0, 0, 0, 0.79)',
     textAlign: 'center',
     fontFamily: 'Poppins',
     fontSize: 13,
-    // fontStyle: 'normal',
     fontWeight: '400',
-    lineHeight: 13, 
+    lineHeight: 13,
     marginBottom: 8,
   },
-  welcome:{
-    color: '#000',              
+  welcome: {
+    color: '#000',
     fontFamily: 'SemiBoldPoppins',
     fontSize: 18,
-    // fontStyle: 'normal',
     fontWeight: '600',
-    lineHeight: 22, 
+    lineHeight: 22,
     marginTop: 179,
   },
-  feather:{
-    color: '#000',
-    fontFamily: 'Praise',
-    textAlign: 'center', 
-    fontSize: 24,
-    // fontStyle: 'normal',
-    fontWeight: '400',
-    lineHeight: 28,
-  },
-  register:{
+  register: {
     marginTop: 30,
     marginBottom: 17,
   },
-  haveAccount:{
+  haveAccount: {
     color: 'rgba(0, 0, 0, 0.79)',
     textAlign: 'center',
     fontFamily: 'Poppins',
     fontSize: 13,
-    fontStyle: 'normal',
     fontWeight: '400',
     lineHeight: 18,
   },
-  signup:{
+  signup: {
     color: 'rgba(80, 194, 201, 0.79)',
     fontFamily: 'SemiBoldPoppins',
     fontSize: 13,
-    fontStyle: 'normal',
     fontWeight: '700',
     lineHeight: 18,
     marginLeft: 5,
   },
-  signinContainer:{
-    flexDirection:'row',
+  signinContainer: {
+    flexDirection: 'row',
   },
   agreement: {
     color: 'rgba(0, 0, 0, 0.79)',
     fontFamily: 'Poppins',
     fontSize: 13,
-    fontStyle: 'normal',
     fontWeight: '400',
     lineHeight: 18,
-    width:346,
-  }
+    width: 346,
+  },
 });
 
 export default SigninPage;
+

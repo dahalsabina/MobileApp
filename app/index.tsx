@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from "expo-router";
+import{ ButtonCompo }from '@/components/ButtonCompo';
+
 
 /**
  * App component serves as the landing page of the application.
@@ -57,13 +59,7 @@ const App = () => {
       </View>
 
       {/* Get Started Button */}
-      <TouchableOpacity
-        onPress={() => router.push("/register")}
-        style={styles.button}
-        activeOpacity={0.8}
-      >
-        <Text style={styles.buttonText}>Get Started</Text>
-      </TouchableOpacity>
+      <ButtonCompo onPress={() => router.push("./register")} text='Register'></ButtonCompo>
     </SafeAreaView>
   );
 };

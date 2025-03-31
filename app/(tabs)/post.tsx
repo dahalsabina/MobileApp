@@ -9,8 +9,8 @@ import {
   Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { collection, addDoc, serverTimestamp, doc, updateDoc } from '@firebase/firestore';
-import { db } from '../../firebaseConfig';  // Import Firestore database instance
+import { collection, addDoc, serverTimestamp } from '@firebase/firestore';
+import { db } from '../../firebaseConfig';  // Import Firestore instance
 
 const DiscussionPost = () => {
   const [headline, setHeadline] = useState<string>('');
@@ -31,23 +31,19 @@ const DiscussionPost = () => {
 
     try {
       // Add a new document to the 'discussions' collection
-      const docRef = await addDoc(collection(db, 'discussions'), {
+      await addDoc(collection(db, 'discussions'), {
         title: headline,
         body: notes,
-        user_id: 'sample-user-id',  // Replace with actual user ID if available
+        user_id: 'sadie_adler',  // Replace with actual user ID if using auth
+        likes_count: 0,          // Default like count
         created_at: serverTimestamp(),
         updated_at: serverTimestamp(),
-      });
-
-      // Update the document to include its own auto-generated ID
-      await updateDoc(doc(db, 'discussions', docRef.id), {
-        discussion_id: docRef.id,  // Add the auto-generated ID as a field
       });
 
       Alert.alert('Success', 'Discussion added successfully!');
       setHeadline('');
       setNotes('');
-      router.replace('/(tabs)/homePage');  // Navigate back to home page
+      router.replace('/(tabs)/home');  // Navigate back to home screen
     } catch (err) {
       console.error('Error adding discussion: ', err);
       Alert.alert('Error', err instanceof Error ? err.message : 'An unknown error occurred');
@@ -87,13 +83,44 @@ const DiscussionPost = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f4f4f4', padding: 20, justifyContent: 'center' },
-  headerText: { fontSize: 24, fontWeight: 'bold', color: '#2c3e50', marginBottom: 20, textAlign: 'center' },
-  input: { borderWidth: 1, borderColor: '#ccc', padding: 12, borderRadius: 8, marginBottom: 10, backgroundColor: '#fff' },
-  textArea: { height: 120, textAlignVertical: 'top' },
-  button: { backgroundColor: '#38b2ac', paddingVertical: 14, borderRadius: 8, alignItems: 'center', justifyContent: 'center', marginTop: 10 },
-  buttonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
+  container: {
+    flex: 1,
+    backgroundColor: '#f4f4f4',
+    padding: 20,
+    justifyContent: 'center',
+  },
+  headerText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#2c3e50',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 10,
+    backgroundColor: '#fff',
+  },
+  textArea: {
+    height: 120,
+    textAlignVertical: 'top',
+  },
+  button: {
+    backgroundColor: '#38b2ac',
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 10,
+  },
+  buttonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
 });
 
 export default DiscussionPost;
-
