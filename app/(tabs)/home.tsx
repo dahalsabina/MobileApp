@@ -10,7 +10,20 @@ import {
   Image,
   TextInput,
 } from 'react-native';
-import { collection, query, orderBy, where, addDoc, onSnapshot, updateDoc, deleteDoc, increment, getDocs, serverTimestamp, doc } from '@firebase/firestore';
+import {
+  collection,
+  query,
+  orderBy,
+  where,
+  addDoc,
+  onSnapshot,
+  updateDoc,
+  deleteDoc,
+  increment,
+  getDocs,
+  serverTimestamp,
+  doc,
+} from '@firebase/firestore';
 import { db } from '@/firebaseConfig';
 import { Link } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -21,6 +34,7 @@ type Discussion = {
   title: string;
   body: string;
   user_id: string;
+  user_name?: string; // Added optional user_name field
   created_at: any;
   updated_at: any;
   likes_count: number;
@@ -64,7 +78,7 @@ const CommentSection = ({ discussionId }: { discussionId: string }) => {
     try {
       const docRef = await addDoc(collection(db, "Comment"), {
         content: newComment,
-        user_id: "currentUserId",
+        user_id: "currentUserId", // Replace with actual user ID
         discussion_id: discussionId,
         created_at: serverTimestamp(),
         updated_at: serverTimestamp(),
@@ -161,7 +175,8 @@ const DiscussionItem = ({ item }: { item: Discussion }) => {
 
   return (
     <View style={styles.discussionItem}>
-      <Text style={styles.username}>{item.user_id}</Text>
+      {/* Display the user_name if available, otherwise fallback to user_id */}
+      <Text style={styles.username}>{item.user_name || item.user_id}</Text>
 
       <Link
         href={{
@@ -237,6 +252,7 @@ const HomePage = () => {
     </SafeAreaView>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -333,7 +349,8 @@ const styles = StyleSheet.create({
   },
 });
 
-
 export default HomePage;
+
+
 
 

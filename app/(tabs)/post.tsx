@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -23,7 +23,33 @@ const DiscussionPost = () => {
   const [headline, setHeadline] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
+  const [userName, setUserName] = useState<string>('Anonymous');
   const router = useRouter();
+
+  // Fetch the authorized user's name from the 'users' collection
+  useEffect(() => {
+    const fetchUserName = async () => {
+      const currentUser = auth.currentUser;
+      if (!currentUser || !currentUser.email) return;
+
+      try {
+        const usersRef = collection(db, 'users');
+        const q = query(usersRef, where('user_email', '==', currentUser.email));
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+          const userDoc = querySnapshot.docs[0];
+          const nameFromDoc = userDoc.data().name;
+          if (nameFromDoc) {
+            setUserName(nameFromDoc);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user name:', error);
+      }
+    };
+
+    fetchUserName();
+  }, []);
 
   /**
    * Handles the submission of a new discussion post to Firestore.
@@ -45,24 +71,13 @@ const DiscussionPost = () => {
         return;
       }
 
-      // Fetch the user's name from the 'users' collection
-      let userName = 'Anonymous'; // Fallback if not found
-      const usersRef = collection(db, 'users');
-      // You can match by user_id (UID) or user_email. Below matches by email:
-      const q = query(usersRef, where('user_email', '==', currentUser.email));
-      const querySnapshot = await getDocs(q);
-
-      if (!querySnapshot.empty) {
-        const userDoc = querySnapshot.docs[0];
-        userName = userDoc.data().name || 'Anonymous';
-      }
-
-      // Now create the discussion document in Firestore
+      // Add a new discussion document to the 'discussions' collection,
+      // using the fetched userName from the users collection.
       await addDoc(collection(db, 'discussions'), {
         title: headline,
         body: notes,
-        user_id: currentUser.uid, // store the UID for reference
-        user_name: userName,      // store the name from the 'users' collection
+        user_id: currentUser.uid,  // store UID if needed
+        user_name: userName,       // store the authorized user's name
         likes_count: 0,
         created_at: serverTimestamp(),
         updated_at: serverTimestamp(),
@@ -71,8 +86,7 @@ const DiscussionPost = () => {
       Alert.alert('Success', 'Discussion added successfully!');
       setHeadline('');
       setNotes('');
-      // Navigate back to home screen (adjust path as needed)
-      router.replace('/(tabs)/home');
+      router.replace('/(tabs)/home'); // Navigate back to home screen
     } catch (err) {
       console.error('Error adding discussion: ', err);
       Alert.alert(
@@ -156,4 +170,5 @@ const styles = StyleSheet.create({
 });
 
 export default DiscussionPost;
+
 

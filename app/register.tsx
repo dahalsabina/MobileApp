@@ -113,11 +113,10 @@ const RegisterPage = () => {
               isSecure={true}
             />
 
-            {/* Confirm password (not currently validated) */}
+            
             <InputCompo
               text="Confirm password"
-              // Ideally you'd have another state for confirmPassword
-              // and compare with 'password' before createUser
+            
             />
 
             <Text style={styles.agreement}>
