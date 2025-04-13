@@ -29,6 +29,7 @@ export function PostCardCompo({
   onLike,
   onComment,
   onShare,
+  isLiked,
 }: PostCardProps) {
   return (
     <View style={styles.card}>
@@ -53,7 +54,7 @@ export function PostCardCompo({
           <Text>{comments}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.likeContainer} onPress={onLike}>
-          <Image source={likeIcon} style={styles.eachIcon} />
+          <Image source={isLiked ? likeIcon : likeIcon}  style={styles.eachIcon} />
           <Text>{likes}</Text>
         </TouchableOpacity>
       </View>

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, StatusBar, TouchableOpacity, Text, SafeAreaView, ScrollView, } from 'react-native';
 import PostCardCompo from '../../components/PostCardCompo';
 
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
 import { db } from '@/firebaseConfig'; // Ensure your Firestore instance is imported
 
 // Define types for the post data
@@ -46,6 +46,43 @@ const home = () => {
     fetchDiscussions();
   }, []);
 
+  const handleLike = async (postId: string) => {
+    try {
+      const currentDiscussion = discussions.find((d) => d.id === postId);
+      if (!currentDiscussion) return;
+
+      const isLiked = currentDiscussion.isLiked || false;
+      const updatedLikesCount = isLiked
+        ? currentDiscussion.likes_count - 1
+        : currentDiscussion.likes_count + 1;
+
+      // Update local state
+      setDiscussions((prevDiscussions) =>
+        prevDiscussions.map((discussion) =>
+          discussion.id === postId
+            ? { ...discussion, likes_count: updatedLikesCount, isLiked: !isLiked }
+            : discussion
+        )
+      );
+
+      // Update Firebase
+      const postRef = doc(db, 'discussions', postId);
+      await updateDoc(postRef, {
+        likes_count: updatedLikesCount,
+      });
+    } catch (error) {
+      console.error('Error toggling like:', error);
+    }
+  };
+
+  const handleComment = async (postId: string) => {
+    // Similar logic for comments
+  };
+
+  const handleShare = async (postId: string) => {
+    // Similar logic for shares
+  };
+
   const posts: Post[] = discussions.map((discussion) => ({
     id: discussion.id,
     username: discussion.user_id, // default using user_id
@@ -54,6 +91,7 @@ const home = () => {
     shares: 0, 
     comments: 0, 
     likes: discussion.likes_count,
+    isLiked: discussion.isLiked || false,
   }));
 
   return (
@@ -102,6 +140,9 @@ const home = () => {
             likes={post.likes}
             comments={post.comments}
             shares={post.shares}
+            onLike={() => handleLike(post.id)}
+            onComment={() => handleComment(post.id)}
+            onShare={() => handleShare(post.id)}
           />
         ))}
       </ScrollView>
