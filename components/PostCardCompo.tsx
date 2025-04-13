@@ -1,9 +1,9 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
-import likeIcon from '../assets/project_images/like.png'
-import commentIcon from '../assets/project_images/comment.png'
-import replyIcon from '../assets/project_images/reply.png'
-import divideLine from '../assets/project_images/line.png'
+import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import likeIcon from '../assets/project_images/like.png';
+import commentIcon from '../assets/project_images/comment.png';
+import replyIcon from '../assets/project_images/reply.png';
+import divideLine from '../assets/project_images/line.png';
 
 interface PostCardProps {
   username?: string;
@@ -13,9 +13,23 @@ interface PostCardProps {
   likes?: number;
   comments?: number;
   shares?: number;
+  onLike?: () => void;
+  onComment?: () => void;
+  onShare?: () => void;
 }
 
-export function PostCardCompo ({ username, content, imageSource, likes, comments, shares, profileImageSource }: PostCardProps) {
+export function PostCardCompo({
+  username,
+  content,
+  imageSource,
+  likes,
+  comments,
+  shares,
+  profileImageSource,
+  onLike,
+  onComment,
+  onShare,
+}: PostCardProps) {
   return (
     <View style={styles.card}>
       <View style={styles.header}>
@@ -30,22 +44,22 @@ export function PostCardCompo ({ username, content, imageSource, likes, comments
         <Image source={divideLine} styles={styles.divideLine} />
       </View>
       <View style={styles.footer}>
-        <View style={styles.likeContainer}>
+        <TouchableOpacity style={styles.likeContainer} onPress={onShare}>
           <Image source={replyIcon} style={styles.eachIcon} />
-          <Text>{likes}</Text>
-        </View>
-        <View style={styles.likeContainer}>
+          <Text>{shares}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.likeContainer} onPress={onComment}>
           <Image source={commentIcon} style={styles.eachIcon} />
-          <Text>{likes}</Text>
-        </View>
-        <View style={styles.likeContainer}>
+          <Text>{comments}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.likeContainer} onPress={onLike}>
           <Image source={likeIcon} style={styles.eachIcon} />
           <Text>{likes}</Text>
-        </View>
+        </TouchableOpacity>
       </View>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   card: {
@@ -67,7 +81,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 8,
     marginTop: 6.5,
-    marginLeft: 4.5
+    marginLeft: 4.5,
   },
   avatar: {
     width: 22,
@@ -80,14 +94,14 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     borderRadius: 20,
-    // marginTop: 
+    // marginTop:
   },
   username: {
     fontWeight: 'bold',
   },
   content: {
     marginBottom: 8,
-    marginLeft: 4.5
+    marginLeft: 4.5,
   },
   postImage: {
     width: 335,

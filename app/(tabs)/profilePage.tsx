@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import PostCardCompo from '../../components/PostCardCompo';
 import { useLocalSearchParams } from 'expo-router';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
 import { db } from '@/firebaseConfig'; // Ensure your Firestore instance is imported
 
 
@@ -98,7 +98,46 @@ const posts: Post[] = discussions.map((discussion) => ({
   shares: 0, 
   comments: 0, 
   likes: discussion.likes_count,
+  isLiked: discussion.isLiked || false,
 }));
+
+const handleLike = async (postId: string) => {
+  try {
+    // Find the current discussion
+    const currentDiscussion = discussions.find((d) => d.id === postId);
+    if (!currentDiscussion) return;
+
+    const isLiked = currentDiscussion.isLiked || false; // Default to false if not set
+    const updatedLikesCount = isLiked
+      ? currentDiscussion.likes_count - 1
+      : currentDiscussion.likes_count + 1;
+
+    // Update the local state
+    setDiscussions((prevDiscussions) =>
+      prevDiscussions.map((discussion) =>
+        discussion.id === postId
+          ? { ...discussion, likes_count: updatedLikesCount, isLiked: !isLiked }
+          : discussion
+      )
+    );
+
+    // Update Firebase
+    const postRef = doc(db, 'discussions', postId);
+    await updateDoc(postRef, {
+      likes_count: updatedLikesCount,
+    });
+  } catch (error) {
+    console.error('Error toggling like:', error);
+  }
+};
+
+const handleComment = async (postId: string) => {
+  // Similar logic for comments
+};
+
+const handleShare = async (postId: string) => {
+  // Similar logic for shares
+};
 
   return (
     <SafeAreaView style={styles.container}>
@@ -133,6 +172,9 @@ const posts: Post[] = discussions.map((discussion) => ({
             likes={post.likes}
             comments={post.comments}
             shares={post.shares}
+            onLike={() => handleLike(post.id)}
+            onComment={() => handleComment(post.id)}
+            onShare={() => handleShare(post.id)}
           />
         ))}
       </ScrollView>
