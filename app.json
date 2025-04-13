@@ -14,7 +14,8 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.feather.boidtravel"
+      "bundleIdentifier": "com.feather.boidtravel",
+      "newArchEnabled": true  
     },
     "android": {
       "adaptiveIcon": {
@@ -36,8 +37,9 @@
       "typedRoutes": true
     },
     "extra": {
-      
       "iosClientId": "{GOOGLE_CLIENT_ID}"
     }
   }
 }
+
+

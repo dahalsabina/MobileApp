@@ -1,32 +1,50 @@
-import{ ButtonCompo }from '@/components/ButtonCompo';
-import{ InputCompo }from '@/components/InputCompo';
-import React, {useState} from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image } from 'react-native';
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  Alert,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import greenCircle from "@/assets/project_images/shape.png";
 import { useRouter } from 'expo-router';
-import { useFonts } from 'expo-font';
-import { auth } from '../firebaseConfig'
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth, db } from '../firebaseConfig'; // <-- Make sure this imports BOTH Auth & Firestore
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore'; // <-- Firestore imports
+import { InputCompo } from '@/components/InputCompo';
+import { ButtonCompo } from '@/components/ButtonCompo';
 
+// The RegisterPage component
 const RegisterPage = () => {
   const router = useRouter();
 
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  // Capture all necessary fields
+  const [name, setName] = useState('');      // <-- new
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [inputErrors, setInputErrors] = useState({ email: false, password: false });
-
 
   const handleSignUp = () => {
     setInputErrors({ email: false, password: false });
 
-    auth
     createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        // Signed up 
+      .then(async (userCredential) => {
+        // Signed up in Firebase Auth
         const user = userCredential.user;
-        console.log(user.email)
-        // ...
+        console.log('User created in Auth:', user.email, user.uid);
+
+        // Now store user info in Firestore "users" collection
+        await setDoc(doc(db, 'users', user.uid), {
+          user_id: user.uid,
+          user_email: user.email,
+          name: name,           // store the name captured from input
+          created_at: new Date(),
+        });
+
+        Alert.alert('Success', 'Registration successful!');
+        // Optionally navigate to another screen, e.g.:
+        router.push('./signIn');
       })
       .catch((error) => {
         let errorMessage = '';
@@ -55,43 +73,69 @@ const RegisterPage = () => {
 
         setInputErrors(newInputErrors);
         Alert.alert('Registration Error', errorMessage, [{ text: 'OK' }]);
-        // ..
       });
-  }
-  
+  };
 
   return (
     <View>
-      <Image 
-          source={require("@/assets/project_images/shape.png")}
-          style={{position:'absolute'}}
+      <Image
+        source={require('@/assets/project_images/shape.png')}
+        style={{ position: 'absolute' }}
       />
       <SafeAreaView>
         <View style={styles.centralContainer}>
           <View>
             <Text style={styles.welcome}>Welcome to</Text>
             <Text style={styles.feather}>feather! 🪶</Text>
-            <Text style={styles.journey}>Start your journey. </Text>
+            <Text style={styles.journey}>Start your journey.</Text>
           </View>
+
           <View style={styles.inputContainer}>
-            <InputCompo text='Enter your name' />
-            <InputCompo text='Enter your email'  curValue={email} curChange={(text) => setEmail(text)} 
+            {/* Capture name from the user */}
+            <InputCompo
+              text="Enter your name"
+              curValue={name}
+              curChange={setName}
             />
-            <InputCompo text='Enter password' curValue={password} curChange={(text) => setPassword(text)} />
-            <InputCompo text='Confirm password' />
-            <Text style={styles.agreement}>*By clicking register, you agree with the app's privary policy...</Text>
+
+            {/* Capture email */}
+            <InputCompo
+              text="Enter your email"
+              curValue={email}
+              curChange={setEmail}
+            />
+
+            {/* Capture password */}
+            <InputCompo
+              text="Enter password"
+              curValue={password}
+              curChange={setPassword}
+              isSecure={true}
+            />
+
+            
+            <InputCompo
+              text="Confirm password"
+            
+            />
+
+            <Text style={styles.agreement}>
+              *By clicking register, you agree with the app's privacy policy...
+            </Text>
           </View>
+
           <View style={styles.register}>
-            <ButtonCompo onPress={handleSignUp} text='Register'>
-            </ButtonCompo>
+            <ButtonCompo onPress={handleSignUp} text="Register" />
           </View>
+
           <View style={styles.signinContainer}>
             <Text style={styles.haveAccount}>Already have an account?</Text>
             <TouchableOpacity
-              onPress={() => router.push("./signIn")}
-              activeOpacity={0.7}>
-            <Text style={styles.signin}>Sign in</Text>
-          </TouchableOpacity>
+              onPress={() => router.push('./signIn')}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.signin}>Sign in</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </SafeAreaView>
@@ -100,48 +144,45 @@ const RegisterPage = () => {
 };
 
 const styles = StyleSheet.create({
-  centralContainer:{
+  centralContainer: {
     justifyContent: 'center',
     alignItems: 'center',
   },
-  inputContainer:{
+  inputContainer: {
     gap: 21,
     alignItems: 'center',
   },
-  journey:{
+  journey: {
     color: 'rgba(0, 0, 0, 0.79)',
     textAlign: 'center',
     fontFamily: 'Poppins',
     fontSize: 13,
-    // fontStyle: 'normal',
     fontWeight: '400',
-    lineHeight: 13, 
-    marginTop:10,
+    lineHeight: 13,
+    marginTop: 10,
     marginBottom: 54,
   },
-  welcome:{
-    color: '#000',              
+  welcome: {
+    color: '#000',
     fontFamily: 'Poppins',
     fontSize: 18,
-    // fontStyle: 'normal',
     fontWeight: '600',
-    lineHeight: 22, 
+    lineHeight: 22,
     marginTop: 179,
   },
-  feather:{
+  feather: {
     color: '#000',
     fontFamily: 'Praise',
-    textAlign: 'center', 
+    textAlign: 'center',
     fontSize: 24,
-    // fontStyle: 'normal',
     fontWeight: '400',
     lineHeight: 28,
   },
-  register:{
+  register: {
     marginTop: 30,
     marginBottom: 17,
   },
-  haveAccount:{
+  haveAccount: {
     color: 'rgba(0, 0, 0, 0.79)',
     textAlign: 'center',
     fontFamily: 'Poppins',
@@ -150,7 +191,7 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     lineHeight: 18,
   },
-  signin:{
+  signin: {
     color: 'rgba(80, 194, 201, 0.79)',
     fontFamily: 'Poppins',
     fontSize: 13,
@@ -159,8 +200,8 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     marginLeft: 5,
   },
-  signinContainer:{
-    flexDirection:'row',
+  signinContainer: {
+    flexDirection: 'row',
   },
   agreement: {
     color: 'rgba(0, 0, 0, 0.79)',
@@ -169,8 +210,9 @@ const styles = StyleSheet.create({
     fontStyle: 'normal',
     fontWeight: '400',
     lineHeight: 18,
-    width:346,
-  }
+    width: 346,
+  },
 });
 
 export default RegisterPage;
+
