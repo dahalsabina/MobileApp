@@ -94,7 +94,7 @@ export default function Page() {
 
             {/* Profile Tab */}
             <Tabs.Screen
-                name="profilePage"
+                name="profile"
                 options={{
                     tabBarLabel: "",
                     /**
