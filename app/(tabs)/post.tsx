@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -7,16 +7,92 @@ import {
   Image,
   StyleSheet,
   SafeAreaView,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons'; // For icons (e.g., plus sign)
 import { useNavigation } from '@react-navigation/native';
 import{ ButtonCompo }from '@/components/ButtonCompo';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { auth, db } from '@/firebaseConfig';
+import { router } from 'expo-router';
 
 const CreatePostScreen: React.FC = () => {
   const navigation = useNavigation(); // Hook for navigation
   const [headline, setHeadline] = useState('');
   const [notes, setNotes] = useState('');
   const [image, setImage] = useState<string | null>(null); // Placeholder for image URI
+  const [loading, setLoading] = useState(false);
+  const [userName, setUserName] = useState('Anonymous');
+
+  // Fetch the authorized user's name from the 'users' collection
+  useEffect(() => {
+    const fetchUserName = async () => {
+      const currentUser = auth.currentUser;
+      if (!currentUser || !currentUser.email) return;
+
+      try {
+        const usersRef = collection(db, 'users');
+        const q = query(usersRef, where('user_email', '==', currentUser.email));
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+          const userDoc = querySnapshot.docs[0];
+          const nameFromDoc = userDoc.data().name;
+          if (nameFromDoc) {
+            setUserName(nameFromDoc);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user name:', error);
+      }
+    };
+
+    fetchUserName();
+  }, []);
+
+  // Function to handle posting to Firebase
+  const handlePost = async () => {
+    if (!headline.trim() || !notes.trim()) {
+      Alert.alert('Error', 'Both headline and notes are required.');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        Alert.alert('Error', 'No user is currently signed in.');
+        setLoading(false);
+        return;
+      }
+
+      await addDoc(collection(db, 'discussions'), {
+        title: headline,
+        body: notes,
+        user_id: currentUser.uid,
+        user_name: userName,
+        likes_count: 0,
+        created_at: serverTimestamp(),
+        updated_at: serverTimestamp(),
+      });
+
+      Alert.alert('Success', 'Post added successfully!');
+      setHeadline('');
+      setNotes('');
+      router.push("./home"); // Navigate back to home screen
+    } catch (err) {
+      console.error('Error adding post: ', err);
+      Alert.alert('Error', err instanceof Error ? err.message : 'An unknown error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+
+
+
 
   return (
     <SafeAreaView style={styles.container}>
@@ -63,7 +139,11 @@ const CreatePostScreen: React.FC = () => {
 
       {/* Post Button */}
       <View style={styles.postButton}>
-        <ButtonCompo text='Post'></ButtonCompo>
+        {loading ? (
+          <ActivityIndicator size="large" color="#38b2ac" />
+        ) : (
+          <ButtonCompo text="Post" onPress={handlePost} />
+        )}
       </View>
       
     </SafeAreaView>
