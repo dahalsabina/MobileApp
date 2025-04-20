@@ -121,7 +121,7 @@ const SigninPage = () => {
 
           <View style={styles.signinContainer}>
             <Text style={styles.haveAccount}>Don't have an account yet?</Text>
-            <TouchableOpacity onPress={() => router.push('./register')}>
+            <TouchableOpacity onPress={() => router.push('/register')}>
               <Text style={styles.signup}>Sign up</Text>
             </TouchableOpacity>
           </View>

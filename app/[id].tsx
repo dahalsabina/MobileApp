@@ -21,6 +21,7 @@ import {
   where,
   addDoc,
   getDocs,
+  getDoc,
   updateDoc,
   deleteDoc,
   increment,
@@ -30,7 +31,6 @@ import { db } from '../firebaseConfig';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useLocalSearchParams as useSearchParams, router } from 'expo-router';
 
-// Hides the default header (tabs, [id]) for this screen
 export const screenOptions = {
   headerShown: false,
 };
@@ -64,18 +64,33 @@ const DiscussionDetail = () => {
   const [error, setError] = useState('');
   const [newComment, setNewComment] = useState('');
   const [isLiked, setIsLiked] = useState(false);
+  const [authorName, setAuthorName] = useState<string>('Loading...');
 
   useEffect(() => {
     if (!discussionId) return;
 
-    // Listen to discussion document updates
     const discussionRef = doc(db, 'discussions', discussionId);
     const unsubscribeDiscussion = onSnapshot(
       discussionRef,
-      (docSnapshot) => {
+      async (docSnapshot) => {
         if (docSnapshot.exists()) {
           const data = docSnapshot.data() as Omit<Discussion, 'id'>;
           setDiscussion({ id: docSnapshot.id, ...data });
+
+          // Fetch author name
+          if (data.user_id) {
+            try {
+              const userSnap = await getDoc(doc(db, 'users', data.user_id));
+              if (userSnap.exists()) {
+                setAuthorName(userSnap.data().name || 'Unknown');
+              } else {
+                setAuthorName('Unknown');
+              }
+            } catch (err) {
+              setAuthorName('Unknown');
+              console.error('Failed to fetch author name:', err);
+            }
+          }
         } else {
           setError('Discussion not found');
         }
@@ -88,7 +103,6 @@ const DiscussionDetail = () => {
       }
     );
 
-    // Listen to comments for this discussion
     const commentsRef = collection(db, 'Comment');
     const commentsQuery = query(
       commentsRef,
@@ -115,12 +129,11 @@ const DiscussionDetail = () => {
     };
   }, [discussionId]);
 
-  // Check if the user has liked this discussion
   useEffect(() => {
     const checkIfLiked = async () => {
       const likeQuery = query(
         collection(db, "likes"),
-        where("user_id", "==", "currentUserId"), // Replace with actual user ID
+        where("user_id", "==", "currentUserId"),
         where("discussion_id", "==", discussionId)
       );
       const snapshot = await getDocs(likeQuery);
@@ -132,33 +145,30 @@ const DiscussionDetail = () => {
     }
   }, [discussionId]);
 
-  // Toggle like/unlike
   const handleLike = async () => {
     try {
       const likeQuery = query(
         collection(db, "likes"),
-        where("user_id", "==", "currentUserId"), // Replace with actual user ID
+        where("user_id", "==", "currentUserId"),
         where("discussion_id", "==", discussionId)
       );
       const snapshot = await getDocs(likeQuery);
 
       if (snapshot.empty) {
-        // Add like document
         await addDoc(collection(db, "likes"), {
           user_id: "currentUserId",
           discussion_id: discussionId,
           liked: true,
           created_at: serverTimestamp(),
         });
-        // Increment like count
+
         await updateDoc(doc(db, "discussions", discussionId), {
           likes_count: increment(1),
         });
         setIsLiked(true);
       } else {
-        // Remove the like document
         await deleteDoc(doc(db, "likes", snapshot.docs[0].id));
-        // Decrement like count
+
         await updateDoc(doc(db, "discussions", discussionId), {
           likes_count: increment(-1),
         });
@@ -169,13 +179,12 @@ const DiscussionDetail = () => {
     }
   };
 
-  // Add a new comment
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
     try {
       await addDoc(collection(db, 'Comment'), {
         content: newComment,
-        user_id: 'currentUserId', // Replace with actual user ID
+        user_id: 'currentUserId',
         discussion_id: discussionId,
         created_at: serverTimestamp(),
       });
@@ -185,7 +194,6 @@ const DiscussionDetail = () => {
     }
   };
 
-  // Render individual comment
   const renderComment = ({ item }: { item: Comment }) => (
     <View style={styles.commentItem}>
       <Text style={styles.commentText}>{item.content}</Text>
@@ -215,12 +223,10 @@ const DiscussionDetail = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Custom Header */}
       <View style={styles.customHeader}>
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color="#1D3557" />
         </TouchableOpacity>
-        {/* <Text style={styles.headerTitle}>Discussion</Text> */}
       </View>
 
       <FlatList
@@ -235,7 +241,7 @@ const DiscussionDetail = () => {
                 source={{ uri: 'https://via.placeholder.com/45' }}
                 style={styles.userImage}
               />
-              <Text style={styles.username}>{discussion.user_id}</Text>
+              <Text style={styles.username}>{authorName}</Text>
             </View>
 
             <Text style={styles.detailTitle}>{discussion.title}</Text>
@@ -298,12 +304,6 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     paddingHorizontal: 20,
     backgroundColor: '#EFF3F8',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginLeft: 10,
-    color: '#1D3557',
   },
   discussionDetail: {
     backgroundColor: '#FFFFFF',
@@ -399,6 +399,7 @@ const styles = StyleSheet.create({
 });
 
 export default DiscussionDetail;
+
 
 
 

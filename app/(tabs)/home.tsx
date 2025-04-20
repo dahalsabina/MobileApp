@@ -1,3 +1,4 @@
+// HomePageWithComments.tsx
 import React, { useEffect, useState } from 'react';
 import {
   SafeAreaView,
@@ -21,12 +22,16 @@ import {
   deleteDoc,
   increment,
   getDocs,
+  getDoc,
   serverTimestamp,
   doc,
 } from '@firebase/firestore';
+import { getAuth } from 'firebase/auth';
 import { db } from '@/firebaseConfig';
 import { Link } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { Share } from 'react-native';
+
 
 // -------------------- Types --------------------
 type Discussion = {
@@ -34,7 +39,7 @@ type Discussion = {
   title: string;
   body: string;
   user_id: string;
-  user_name?: string; // Added optional user_name field
+  user_name?: string;
   created_at: any;
   updated_at: any;
   likes_count: number;
@@ -45,6 +50,7 @@ type Comment = {
   comment_id: string;
   content: string;
   user_id: string;
+  user_name?: string;
   discussion_id: string;
   created_at: any;
 };
@@ -61,11 +67,19 @@ const CommentSection = ({ discussionId }: { discussionId: string }) => {
       orderBy("created_at", "asc")
     );
 
-    const unsubscribe = onSnapshot(commentsQuery, (snapshot) => {
-      const fetched = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as Comment[];
+    const unsubscribe = onSnapshot(commentsQuery, async (snapshot) => {
+      const fetched: Comment[] = await Promise.all(
+        snapshot.docs.map(async (docSnap) => {
+          const commentData = docSnap.data() as Comment;
+          const userSnap = await getDoc(doc(db, 'users', commentData.user_id));
+          const user_name = userSnap.exists() ? userSnap.data().name : 'Anonymous';
+          return {
+            id: docSnap.id,
+            ...commentData,
+            user_name,
+          };
+        })
+      );
       setComments(fetched);
     });
 
@@ -73,12 +87,13 @@ const CommentSection = ({ discussionId }: { discussionId: string }) => {
   }, [discussionId]);
 
   const addComment = async () => {
-    if (!newComment.trim()) return;
+    const currentUser = getAuth().currentUser;
+    if (!newComment.trim() || !currentUser) return;
 
     try {
       const docRef = await addDoc(collection(db, "Comment"), {
         content: newComment,
-        user_id: "currentUserId", // Replace with actual user ID
+        user_id: currentUser.uid,
         discussion_id: discussionId,
         created_at: serverTimestamp(),
         updated_at: serverTimestamp(),
@@ -102,7 +117,10 @@ const CommentSection = ({ discussionId }: { discussionId: string }) => {
             source={{ uri: 'https://via.placeholder.com/30' }}
             style={styles.commentUserImage}
           />
-          <Text style={styles.commentText}>{comment.content}</Text>
+          <View>
+            <Text style={styles.commentUserName}>{comment.user_name}</Text>
+            <Text style={styles.commentText}>{comment.content}</Text>
+          </View>
         </View>
       ))}
       <View style={styles.commentInputContainer}>
@@ -127,9 +145,12 @@ const DiscussionItem = ({ item }: { item: Discussion }) => {
 
   useEffect(() => {
     const checkIfLiked = async () => {
+      const currentUser = getAuth().currentUser;
+      if (!currentUser) return;
+
       const likeQuery = query(
         collection(db, "likes"),
-        where("user_id", "==", "currentUserId"),
+        where("user_id", "==", currentUser.uid),
         where("discussion_id", "==", item.id)
       );
       const snapshot = await getDocs(likeQuery);
@@ -140,17 +161,19 @@ const DiscussionItem = ({ item }: { item: Discussion }) => {
   }, [item.id]);
 
   const handleLike = async () => {
+    const currentUser = getAuth().currentUser;
+    if (!currentUser) return;
+
     const likeQuery = query(
       collection(db, "likes"),
-      where("user_id", "==", "currentUserId"),
+      where("user_id", "==", currentUser.uid),
       where("discussion_id", "==", item.id)
     );
-
     const snapshot = await getDocs(likeQuery);
 
     if (snapshot.empty) {
       await addDoc(collection(db, "likes"), {
-        user_id: "currentUserId",
+        user_id: currentUser.uid,
         discussion_id: item.id,
         liked: true,
         created_at: serverTimestamp(),
@@ -171,11 +194,32 @@ const DiscussionItem = ({ item }: { item: Discussion }) => {
       setIsLiked(false);
       setLikesCount(likesCount - 1);
     }
+    
+    
+  };
+
+  const handleShare = async (item: Discussion) => {
+    try {
+      const result = await Share.share({
+        message: `${item.title}\n\n${item.body}\n\nCheck it out on Feathr!`,
+      });
+  
+      if (result.action === Share.sharedAction) {
+        if (result.activityType) {
+          console.log('Shared via', result.activityType);
+        } else {
+          console.log('Shared successfully');
+        }
+      } else if (result.action === Share.dismissedAction) {
+        console.log('Share dismissed');
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+    }
   };
 
   return (
     <View style={styles.discussionItem}>
-      {/* Display the user_name if available, otherwise fallback to user_id */}
       <Text style={styles.username}>{item.user_name || item.user_id}</Text>
 
       <Link
@@ -205,10 +249,14 @@ const DiscussionItem = ({ item }: { item: Discussion }) => {
           <Text style={styles.actionText}>Comment</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.actionButton}>
-          <Ionicons name="share-social-outline" size={20} color="#50C2C9" />
-          <Text style={styles.actionText}>Share</Text>
-        </TouchableOpacity>
+        <TouchableOpacity
+  style={styles.actionButton}
+  onPress={() => handleShare(item)}
+>
+  <Ionicons name="share-social-outline" size={20} color="#50C2C9" />
+  <Text style={styles.actionText}>Share</Text>
+</TouchableOpacity>
+
       </View>
 
       <CommentSection discussionId={item.id} />
@@ -254,10 +302,7 @@ const HomePage = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f0f0f0',
-  },
+  container: { flex: 1, backgroundColor: '#f0f0f0' },
   headerText: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -317,14 +362,19 @@ const styles = StyleSheet.create({
   },
   commentItem: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
+    gap: 8,
     marginBottom: 6,
   },
   commentUserImage: {
     width: 28,
     height: 28,
     borderRadius: 14,
-    marginRight: 8,
+  },
+  commentUserName: {
+    fontWeight: '600',
+    fontSize: 13,
+    color: '#222',
   },
   commentText: {
     fontSize: 13,
@@ -350,6 +400,8 @@ const styles = StyleSheet.create({
 });
 
 export default HomePage;
+
+
 
 
 
