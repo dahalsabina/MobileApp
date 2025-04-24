@@ -25,7 +25,7 @@ const SigninPage = () => {
         const user = userCredential.user;
         console.log(user.email)
         router.push({
-          pathname: "./profilePage",
+          pathname: "./profile",
           params: { email: user.email },
         });
         // ...

@@ -8,11 +8,16 @@ import {
   SafeAreaView,
   StatusBar,
   TouchableOpacity,
+  TextInput,
+  ActivityIndicator,
+  FlatList,
 } from 'react-native';
 import PostCardCompo from '../../components/PostCardCompo';
 import { useLocalSearchParams } from 'expo-router';
-import { collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
-import { db } from '@/firebaseConfig'; // Ensure your Firestore instance is imported
+import { collection, query, where, getDocs, updateDoc, doc, onSnapshot } from 'firebase/firestore';
+import { auth, db } from '@/firebaseConfig';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { Link } from 'expo-router';
 
 
 
@@ -27,11 +32,24 @@ interface Post {
   likes: number;
 }
 
+type ProfileUser = {
+  uid: string;
+  name: string;
+  email: string;
+  age?: number;
+  location?: string;
+  bio?: string;
+};
+
 const Profile = () => {
   const { email } = useLocalSearchParams();
 
   const [userId, setUserId] = useState<string | null>(null);
   const [discussions, setDiscussions] = useState<any[]>([]); 
+  const [user, setUser] = useState<ProfileUser | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState(false);
+  const [form, setForm] = useState({ name: '', age: '', location: '', bio: '' });
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -85,10 +103,76 @@ const Profile = () => {
         console.error('Error fetching discussions:', error);
       }
     };
-
+    
+    const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
+          if (!fbUser) {
+            setLoading(false);
+            return;
+          }
+    
+          const uid = fbUser.uid;
+          const userRef = doc(db, 'users', uid);
+    
+          const unsubUser = onSnapshot(userRef, (snap) => {
+            if (!snap.exists()) {
+              setLoading(false);
+              return;
+            }
+    
+            const data = snap.data();
+            const prof: ProfileUser = {
+              uid,
+              name: data.name,
+              email: data.user_email || fbUser.email || '',
+              age: data.age,
+              location: data.location,
+              bio: data.bio,
+            };
+    
+            setUser(prof);
+            setForm({
+              name: prof.name,
+              age: prof.age?.toString() || '',
+              location: prof.location || '',
+              bio: prof.bio || '',
+            });
+            setLoading(false);
+          });
+    
+          const postsQuery = query(collection(db, 'discussions'), where('user_id', '==', uid));
+          const unsubPosts = onSnapshot(postsQuery, (snap) => {
+            setDiscussions(snap.docs.map((d) => {
+              const { id: _, ...data } = d.data() as Post; // Exclude 'id' from spread
+              return { id: d.id, ...data };
+            }));
+          });
+    
+          return () => {
+            unsubUser();
+            unsubPosts();
+          };
+        });
     fetchUserId();
+    return () => unsubscribe();
   }, [email]);
 
+  const saveProfile = async () => {
+      if (!user) return;
+  
+      try {
+        const userRef = doc(db, 'users', user.uid);
+        const fields: Record<string, any> = {
+          name: form.name,
+          age: form.age ? Number(form.age) : null,
+          location: form.location,
+          bio: form.bio,
+        };
+        await updateDoc(userRef, fields);
+        setEditing(false);
+      } catch (err) {
+        console.error('Failed to save profile:', err);
+      }
+    };
   // Transform discussions into posts
 const posts: Post[] = discussions.map((discussion) => ({
   id: discussion.id,
@@ -139,6 +223,14 @@ const handleShare = async (postId: string) => {
   // Similar logic for shares
 };
 
+  if (loading) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#50C2C9" />
+      </View>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <Image 
@@ -154,6 +246,59 @@ const handleShare = async (postId: string) => {
         />
         <Text style={styles.welcomeText}>Welcome {userId}</Text>
       </View>
+
+      {user && (
+              <View style={styles.profileHeader}>
+                {editing ? (
+                  <>
+                    <TextInput
+                      style={styles.input}
+                      value={form.name}
+                      onChangeText={(t) => setForm((f) => ({ ...f, name: t }))}
+                      placeholder="Name"
+                    />
+                    <TextInput
+                      style={styles.input}
+                      value={form.age}
+                      onChangeText={(t) => setForm((f) => ({ ...f, age: t }))}
+                      placeholder="Age"
+                      keyboardType="numeric"
+                    />
+                    <TextInput
+                      style={styles.input}
+                      value={form.location}
+                      onChangeText={(t) => setForm((f) => ({ ...f, location: t }))}
+                      placeholder="Location"
+                    />
+                    <TextInput
+                      style={[styles.input, { height: 80 }]}
+                      value={form.bio}
+                      onChangeText={(t) => setForm((f) => ({ ...f, bio: t }))}
+                      placeholder="Bio"
+                      multiline
+                    />
+                    <View style={styles.buttonRow}>
+                      <TouchableOpacity style={styles.button} onPress={() => setEditing(false)}>
+                        <Text style={styles.buttonText}>Cancel</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={styles.button} onPress={saveProfile}>
+                        <Text style={styles.buttonText}>Save</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </>
+                ) : (
+                  <>
+                    <Text style={styles.name}>{user.name}</Text>
+                    {user.age != null && <Text style={styles.sub}>{user.age} yrs</Text>}
+                    {user.location && <Text style={styles.sub}>{user.location}</Text>}
+                    {user.bio && <Text style={styles.bio}>{user.bio}</Text>}
+                    <TouchableOpacity onPress={() => setEditing(true)} style={styles.editButton}>
+                      <Text style={styles.editText}>Edit Profile</Text>
+                    </TouchableOpacity>
+                  </>
+                )}
+              </View>
+            )}
 
       {/* Post List */}
       <ScrollView style={styles.scrollView}>
@@ -212,6 +357,42 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     marginTop: 10,
   },
+  profileHeader: {
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    margin: 15,
+    padding: 20,
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
+  },
+  name: { fontSize: 24, fontWeight: 'bold', color: '#2c3e50' },
+  sub: { fontSize: 16, color: '#333', marginTop: 4 },
+  bio: { fontSize: 14, color: '#555', marginTop: 8, textAlign: 'center' },
+  editButton: { marginTop: 10 },
+  editText: { color: '#50C2C9', fontSize: 16 },
+  input: {
+    width: '100%',
+    backgroundColor: '#eaeaea',
+    padding: 10,
+    borderRadius: 8,
+    marginVertical: 6,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 10,
+    width: '100%',
+  },
+  button: {
+    backgroundColor: '#50C2C9',
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  buttonText: { color: '#fff', fontWeight: '600' },
   scrollView: {
     flex: 1,
     backgroundColor: '#D9D9D9',
