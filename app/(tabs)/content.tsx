@@ -10,6 +10,7 @@ import {
   TextInput,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useRoute } from '@react-navigation/native';
 
 import divideLine from '../../assets/project_images/line.png';
 import likeIcon from '../../assets/project_images/like.png';
@@ -19,6 +20,9 @@ import replyIcon from '../../assets/project_images/reply.png';
 const Content = () => {
   const [comment, setComment] = useState('');
   const navigation = useNavigation();
+
+  const route = useRoute();
+  const { post } = route.params;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -45,7 +49,8 @@ const Content = () => {
 
         {/* Post Content */}
         <Text style={styles.postTitle}>
-          This is a crazily nice day with all the people coming over to see this event.
+          <Text>{post.content}</Text>
+          <Text style={styles.username}>Posted by: {post.username}</Text>
         </Text>
         <Text style={styles.postDescription}>
           Lorem ipsum dolor sit amet consectetur. Feugiat sed ut urna proin lacus nullam nunc

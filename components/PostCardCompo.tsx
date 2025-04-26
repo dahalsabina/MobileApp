@@ -16,6 +16,7 @@ interface PostCardProps {
   onLike?: () => void;
   onComment?: () => void;
   onShare?: () => void;
+  onPress?: () => void;
 }
 
 export function PostCardCompo({
@@ -30,6 +31,7 @@ export function PostCardCompo({
   onComment,
   onShare,
   isLiked,
+  onPress,
 }: PostCardProps) {
   return (
     <View style={styles.card}>
@@ -39,7 +41,9 @@ export function PostCardCompo({
         </View>
         <Text style={styles.username}>{username}</Text>
       </View>
-      <Text style={styles.content}>{content}</Text>
+      <TouchableOpacity onPress={onPress}>
+        <Text style={styles.content}>{content}</Text>
+      </TouchableOpacity>
       <Image source={imageSource} style={styles.postImage} />
       <View>
         <Image source={divideLine} styles={styles.divideLine} />

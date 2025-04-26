@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, StatusBar, TouchableOpacity, Text, SafeAreaView, ScrollView, } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import PostCardCompo from '../../components/PostCardCompo';
 
 import { collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
@@ -19,6 +20,7 @@ interface Post {
 const home = () => {
   const [activeTab, setActiveTab] = useState('Follow');
   const [discussions, setDiscussions] = useState<any[]>([]); 
+  const navigation = useNavigation();
 
   useEffect(() => {
     const fetchDiscussions = async () => {
@@ -143,6 +145,7 @@ const home = () => {
             onLike={() => handleLike(post.id)}
             onComment={() => handleComment(post.id)}
             onShare={() => handleShare(post.id)}
+            onPress={() => navigation.navigate('content', { post })}
           />
         ))}
       </ScrollView>
