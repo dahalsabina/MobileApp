@@ -40,7 +40,7 @@ const Content = () => {
             style={styles.profileImage}
           />
           <View style={styles.headerTextContainer}>
-            <Text style={styles.username}>John Blender</Text>
+            <Text style={styles.username}>{post.username}</Text>
             <TouchableOpacity style={styles.followButton}>
               <Text style={styles.followText}>Follow</Text>
             </TouchableOpacity>
@@ -48,16 +48,17 @@ const Content = () => {
         </View>
 
         {/* Post Content */}
-        <Text style={styles.postTitle}>
-          <Text>{post.content}</Text>
-          <Text style={styles.username}>Posted by: {post.username}</Text>
-        </Text>
-        <Text style={styles.postDescription}>
-          Lorem ipsum dolor sit amet consectetur. Feugiat sed ut urna proin lacus nullam nunc
-          adipiscing. Risus ac a at tincidunt nec ut sed. Suspendisse in sagittis id nulla morbi
-          interdum. Eget arcu sit malesuada vitae turpis.
-        </Text>
-        <Text style={styles.postFooter}>Last edited: 10-24-2024 Decorah, IA</Text>
+        <View>
+          {post.title ? (
+            <Text style={styles.postTitle}>
+              {post.title}
+            </Text>
+          ) : null}
+          <Text style={styles.postDescription}>
+            <Text>{post.content}</Text>
+          </Text>
+          <Text style={styles.postFooter}>Last edited: 10-24-2024 Decorah, IA</Text>
+        </View>
 
         {/* Comments Section */}
         <View style={styles.commentsSection}>
