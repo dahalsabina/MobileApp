@@ -23,6 +23,7 @@ const Content = () => {
 
   const route = useRoute();
   const { post } = route.params;
+  console.log('post', post);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -129,15 +130,15 @@ const Content = () => {
         <View style={styles.actionsContainer}>
           <TouchableOpacity style={styles.actionButton}>
             <Image source={replyIcon} style={styles.actionIcon} />
-            <Text style={styles.actionText}>3</Text>
+            <Text style={styles.actionText}>{post.shares}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.actionButton}>
             <Image source={likeIcon} style={styles.actionIcon} />
-            <Text style={styles.actionText}>20.1K</Text>
+            <Text style={styles.actionText}>{post.likes}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.actionButton}>
             <Image source={commentIcon} style={styles.actionIcon} />
-            <Text style={styles.actionText}>3K</Text>
+            <Text style={styles.actionText}>{post.comments}</Text>
           </TouchableOpacity>
         </View>
         <TextInput
