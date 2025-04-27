@@ -15,6 +15,7 @@ interface Post {
   shares: number;
   comments: number;
   likes: number;
+  allComments: any[];
 }
 
 const fetchCommentCount = async (discussionId: string): Promise<number> => {
@@ -29,6 +30,20 @@ const fetchCommentCount = async (discussionId: string): Promise<number> => {
   }
 };
 
+const fetchAllComments = async (discussionId: string): Promise<any[]> => {
+  try {
+    const commentsRef = collection(db, 'Comment');
+    const q = query(commentsRef, where('discussion_id', '==', discussionId));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+  } catch (error) {
+    console.error(`Error fetching all comments for discussion ${discussionId}:`, error);
+    return []; // Default to an empty array if there's an error
+  }
+};
 
 const home = () => {
   const [activeTab, setActiveTab] = useState('Follow');
@@ -66,7 +81,8 @@ const home = () => {
       const updatedDiscussions = await Promise.all(
         discussions.map(async (discussion) => {
           const commentCount = await fetchCommentCount(discussion.id);
-          return { ...discussion, commentCount };
+          const allComments = await fetchAllComments(discussion.id);
+          return { ...discussion, commentCount, allComments };
         })
       );
       setDiscussions(updatedDiscussions);
@@ -123,6 +139,7 @@ const home = () => {
     commentsCount: discussion.commentCount || 0, // Use fetched comment count 
     likes: discussion.likes_count,
     isLiked: discussion.isLiked || false,
+    allComments: discussion.allComments || [], // Include all comments
   }));
 
   return (
