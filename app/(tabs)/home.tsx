@@ -17,6 +17,19 @@ interface Post {
   likes: number;
 }
 
+const fetchCommentCount = async (discussionId: string): Promise<number> => {
+  try {
+    const commentsRef = collection(db, 'Comment');
+    const q = query(commentsRef, where('discussion_id', '==', discussionId));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.size; // Number of comments
+  } catch (error) {
+    console.error(`Error fetching comments for discussion ${discussionId}:`, error);
+    return 0; // Default to 0 if there's an error
+  }
+};
+
+
 const home = () => {
   const [activeTab, setActiveTab] = useState('Follow');
   const [discussions, setDiscussions] = useState<any[]>([]); 
@@ -47,6 +60,22 @@ const home = () => {
   
     fetchDiscussions();
   }, []);
+
+  useEffect(() => {
+    const fetchPostsWithComments = async () => {
+      const updatedDiscussions = await Promise.all(
+        discussions.map(async (discussion) => {
+          const commentCount = await fetchCommentCount(discussion.id);
+          return { ...discussion, commentCount };
+        })
+      );
+      setDiscussions(updatedDiscussions);
+    };
+
+    if (discussions.length > 0) {
+      fetchPostsWithComments();
+    }
+  }, [discussions]);
 
   const handleLike = async (postId: string) => {
     try {
@@ -91,7 +120,7 @@ const home = () => {
     content: discussion.body,
     image: '', // default
     shares: 0, 
-    comments: 0, 
+    commentsCount: discussion.commentCount || 0, // Use fetched comment count 
     likes: discussion.likes_count,
     isLiked: discussion.isLiked || false,
   }));
@@ -140,7 +169,7 @@ const home = () => {
               ? { uri: post.image }
               : require('../../assets/project_images/profile_minions.jpg')}
             likes={post.likes}
-            comments={post.comments}
+            comments={post.commentsCount}
             shares={post.shares}
             onLike={() => handleLike(post.id)}
             onComment={() => handleComment(post.id)}

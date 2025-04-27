@@ -138,7 +138,7 @@ const Content = () => {
           </TouchableOpacity>
           <TouchableOpacity style={styles.actionButton}>
             <Image source={commentIcon} style={styles.actionIcon} />
-            <Text style={styles.actionText}>{post.comments}</Text>
+            <Text style={styles.actionText}>{post.commentsCount}</Text>
           </TouchableOpacity>
         </View>
         <TextInput
