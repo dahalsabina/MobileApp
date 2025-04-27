@@ -61,7 +61,30 @@ const Content = () => {
           <Text style={styles.postFooter}>Last edited: 10-24-2024 Decorah, IA</Text>
         </View>
 
-        {/* Comments Section */}
+        {/* CURRENT Comments Section */}
+        <View>
+          <Image source={divideLine} style={styles.divideLine} />
+        </View>
+        {post.allComments && post.allComments.length === 0 ? (
+          <Text style={styles.noCommentsText}>No comment yet.</Text>
+        ) : (
+          post.allComments.map((comment, index) => (
+            <View key={index} style={styles.commentContainer}>
+              <Image
+                source={require('../../assets/project_images/profile_minions.jpg')}
+                style={styles.commentProfileImage}
+              />
+              <View style={styles.commentContent}>
+                <Text style={styles.commentText}>
+                  <Text style={styles.commentUsername}>{comment.user_id} </Text>
+                </Text>
+                <Text style={styles.commentBody}>{comment.content}</Text>
+              </View>
+            </View>
+          ))
+        )}
+
+        {/* IDEAL Comments Section */}
         <View style={styles.commentsSection}>
           <View>
             <Image source={divideLine} style={styles.divideLine} />
