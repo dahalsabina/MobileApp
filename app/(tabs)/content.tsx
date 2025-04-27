@@ -11,6 +11,8 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useRoute } from '@react-navigation/native';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../../firebaseConfig'; // Ensure you have Firebase configured
 
 import divideLine from '../../assets/project_images/line.png';
 import likeIcon from '../../assets/project_images/like.png';
@@ -24,6 +26,30 @@ const Content = () => {
   const route = useRoute();
   const { post } = route.params;
   console.log('post', post);
+
+  const handlePostComment = async () => {
+    if (comment.trim() === '') {
+      alert('Comment cannot be empty.');
+      return;
+    }
+
+    try {
+      const discussionId = post.id; // Assuming discussion_id is part of the post object
+      console.log('discussionId', discussionId);
+      await addDoc(collection(db, 'Comment'), {
+        discussion_id: discussionId,
+        user_id: post.username, // Replace with the actual user ID from your auth system
+        content: comment,
+        created_at: serverTimestamp(),
+      });
+      
+      alert('Comment posted successfully!');
+      setComment(''); // Clear the input field after posting
+    } catch (error) {
+      console.error('Error posting comment: ', error);
+      alert('Failed to post comment. Please try again.');
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -169,6 +195,7 @@ const Content = () => {
           placeholder="Add a comment..."
           value={comment}
           onChangeText={setComment}
+          onSubmitEditing={handlePostComment} // Trigger posting when the user submits the comment
         />
       </View>
     </SafeAreaView>
