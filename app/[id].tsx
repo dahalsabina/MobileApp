@@ -27,6 +27,12 @@ const Content = () => {
   // post from route params
   console.log('post', post);
 
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerShown: false,
+    });
+  }, [navigation]);
+
   const handlePostComment = async () => {
     if (comment.trim() === '') {
       alert('Comment cannot be empty.');
