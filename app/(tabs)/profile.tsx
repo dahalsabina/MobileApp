@@ -19,8 +19,6 @@ import { auth, db } from '@/firebaseConfig';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { Link } from 'expo-router';
 
-
-
 // Define types for the post data
 interface Post {
   id: string;
@@ -177,6 +175,7 @@ const Profile = () => {
 const posts: Post[] = discussions.map((discussion) => ({
   id: discussion.id,
   username: discussion.user_id, // default using user_id
+  title: discussion.title,
   content: discussion.body,
   image: '', // default
   shares: 0, 
@@ -305,6 +304,7 @@ const handleShare = async (postId: string) => {
         {posts.map((post) => (
           <PostCardCompo
             username={post.username}
+            title={post.title}
             content={post.content}
             imageSource={
               post.image.startsWith('http')
