@@ -44,7 +44,7 @@ export function PostCardCompo({
       <TouchableOpacity onPress={onPress}>
         <Text style={styles.content}>{content}</Text>
       </TouchableOpacity>
-      <Image source={imageSource} style={styles.postImage} />
+      {/* <Image source={imageSource} style={styles.postImage} /> */}
       <View>
         <Image source={divideLine} styles={styles.divideLine} />
       </View>
