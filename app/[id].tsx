@@ -22,9 +22,9 @@ import replyIcon from '../assets/project_images/reply.png';
 const Content = () => {
   const [comment, setComment] = useState('');
   const navigation = useNavigation();
-
   const route = useRoute();
-  const { post } = route.params;
+  const { post } = route.params || {}; // Destructure 
+  // post from route params
   console.log('post', post);
 
   const handlePostComment = async () => {
