@@ -145,7 +145,9 @@ const home = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#00C4B4" />
+      {/* <StatusBar barStyle="dark-content" backgroundColor="#00C4B4" /> */}
+      {/* Tab Bar */}
+      {/*
       <View style={styles.tabBar}>
         <TouchableOpacity
           style={[styles.tab, activeTab === 'Follow' && styles.activeTab]}
@@ -172,6 +174,8 @@ const home = () => {
           </Text>
         </TouchableOpacity>
       </View>
+       */}
+
       {/* Post List */}
       <ScrollView style={styles.scrollView}>
         {posts.map((post) => (
