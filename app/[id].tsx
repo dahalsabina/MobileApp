@@ -1,299 +1,421 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
-  SafeAreaView,
   View,
   Text,
-  StyleSheet,
-  FlatList,
-  ActivityIndicator,
-  TouchableOpacity,
   Image,
+  StyleSheet,
+  SafeAreaView,
+  ScrollView,
+  TouchableOpacity,
   TextInput,
-  KeyboardAvoidingView,
-  Platform,
 } from 'react-native';
-import {
-  doc,
-  collection,
-  onSnapshot,
-  query,
-  orderBy,
-  where,
-  addDoc,
-  serverTimestamp,
-} from '@firebase/firestore';
-import { db } from '../firebaseConfig';
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { useLocalSearchParams as useSearchParams } from 'expo-router';
+import { useNavigation } from '@react-navigation/native';
+import { useRoute } from '@react-navigation/native';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../firebaseConfig'; // Ensure you have Firebase configured
 
-const { id } = useSearchParams();
+import divideLine from '../assets/project_images/line.png';
+import likeIcon from '../assets/project_images/like.png';
+import commentIcon from '../assets/project_images/comment.png';
+import replyIcon from '../assets/project_images/reply.png';
 
+const Content = () => {
+  const [comment, setComment] = useState('');
+  const navigation = useNavigation();
 
-type Discussion = {
-  id: string;
-  title: string;
-  body: string;
-  user_id: string;
-  created_at: any;
-  updated_at: any;
-};
+  const route = useRoute();
+  const { post } = route.params;
+  console.log('post', post);
 
-type Comment = {
-  id: string;
-  content: string;       // Matches your Firestore field
-  user_id: string;
-  created_at: any;
-  discussion_id: string; // Ties the comment to a discussion
-};
+  const handlePostComment = async () => {
+    if (comment.trim() === '') {
+      alert('Comment cannot be empty.');
+      return;
+    }
 
-const DiscussionDetail = () => {
-  // Get the discussion id from the route parameters.
-  const { id } = useSearchParams();
-  const discussionId = id as string;
-
-  const [discussion, setDiscussion] = useState<Discussion | null>(null);
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [newComment, setNewComment] = useState('');
-
-  useEffect(() => {
-    if (!discussionId) return;
-
-    // 1. Subscribe to the discussion document in 'discussions' collection
-    //    (Only if you store your discussion data here).
-    const discussionRef = doc(db, 'discussions', discussionId);
-    const unsubscribeDiscussion = onSnapshot(
-      discussionRef,
-      (docSnapshot) => {
-        if (docSnapshot.exists()) {
-          setDiscussion({
-            id: docSnapshot.id,
-            ...(docSnapshot.data() as Omit<Discussion, 'id'>),
-          });
-        } else {
-          setError('Discussion not found');
-        }
-        setLoading(false);
-      },
-      (err) => {
-        console.error('Error loading discussion:', err);
-        setError('Failed to load discussion');
-        setLoading(false);
-      }
-    );
-
-    // 2. Subscribe to the top-level 'Comment' collection
-    //    where 'discussion_id' == discussionId
-    const commentsRef = collection(db, 'Comment');
-    const commentsQuery = query(
-      commentsRef,
-      where('discussion_id', '==', discussionId),
-      orderBy('created_at', 'asc')
-    );
-    const unsubscribeComments = onSnapshot(
-      commentsQuery,
-      (snapshot) => {
-        const fetchedComments: Comment[] = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...(doc.data() as Omit<Comment, 'id'>),
-        }));
-        setComments(fetchedComments);
-      },
-      (err) => {
-        console.error('Error fetching comments:', err);
-      }
-    );
-
-    return () => {
-      unsubscribeDiscussion();
-      unsubscribeComments();
-    };
-  }, [discussionId]);
-
-  // 3. Function to add a comment to the top-level 'Comment' collection
-  const handleAddComment = async () => {
-    if (!newComment.trim()) return;
     try {
+      const discussionId = post.id; // Assuming discussion_id is part of the post object
+      console.log('discussionId', discussionId);
       await addDoc(collection(db, 'Comment'), {
-        content: newComment,
-        user_id: 'currentUserId', // Replace with your actual user ID.
         discussion_id: discussionId,
+        user_id: post.username, // Replace with the actual user ID from your auth system
+        content: comment,
         created_at: serverTimestamp(),
       });
-      setNewComment('');
-    } catch (err) {
-      console.error('Error adding comment:', err);
+      
+      alert('Comment posted successfully!');
+      setComment(''); // Clear the input field after posting
+    } catch (error) {
+      console.error('Error posting comment: ', error);
+      alert('Failed to post comment. Please try again.');
     }
   };
 
-  // If still loading discussion data
-  if (loading) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <ActivityIndicator size="large" color="#1D3557" />
-      </SafeAreaView>
-    );
-  }
-
-  // If there's an error or no discussion found
-  if (error || !discussion) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <Text style={styles.errorText}>{error || 'Discussion not found'}</Text>
-      </SafeAreaView>
-    );
-  }
-
-  // Render each comment
-  const renderComment = ({ item }: { item: Comment }) => (
-    <View style={styles.commentItem}>
-      <Text style={styles.commentText}>{item.content}</Text>
-      {item.created_at && (
-        <Text style={styles.commentDate}>
-          {new Date(item.created_at.seconds * 1000).toLocaleString()}
-        </Text>
-      )}
-    </View>
-  );
-
   return (
     <SafeAreaView style={styles.container}>
-      {/* Discussion details + Like / Share */}
-      <FlatList
-        data={comments}
-        renderItem={renderComment}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.flatListContent}
-        ListHeaderComponent={
-          <View style={styles.discussionDetail}>
-            <View style={styles.userRow}>
-              <Image
-                source={{ uri: 'https://via.placeholder.com/45' }} // Replace with actual user profile image.
-                style={styles.userImage}
-              />
-              <Text style={styles.username}>John Blender</Text>
-            </View>
-
-            <Text style={styles.detailTitle}>{discussion.title}</Text>
-            <Text style={styles.detailBody}>{discussion.body}</Text>
-
-            {/* Like and Share Buttons */}
-            <View style={styles.detailActions}>
-              <TouchableOpacity
-                style={styles.actionButton}
-                onPress={() => {
-                  // Handle Like
-                }}
-              >
-                <Ionicons name="heart-outline" size={20} color="#50C2C9" />
-                <Text style={styles.actionText}>Like</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.actionButton}
-                onPress={() => {
-                  // Handle Share
-                }}
-              >
-                <Ionicons name="share-social-outline" size={20} color="#50C2C9" />
-                <Text style={styles.actionText}>Share</Text>
-              </TouchableOpacity>
-            </View>
-
-            <Text style={styles.commentsHeader}>Comments</Text>
+      <ScrollView>
+        {/* Post Header */}
+        <View style={styles.postHeader}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.returnButton}>
+            <Image
+              source={require('@/assets/project_images/return.png')} // Replace with the path to your image
+              style={styles.returnButtonImage}
+            />
+          </TouchableOpacity>
+          <Image
+            source={require('../assets/project_images/profile_minions.jpg')}
+            style={styles.profileImage}
+          />
+          <View style={styles.headerTextContainer}>
+            <Text style={styles.username}>{post.username}</Text>
+            <TouchableOpacity style={styles.followButton}>
+              <Text style={styles.followText}>Follow</Text>
+            </TouchableOpacity>
           </View>
-        }
-      />
+        </View>
 
-      {/* Add Comment Input */}
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.commentInputContainer}
-      >
+        {/* Post Content */}
+        <View>
+          {post.title ? (
+            <Text style={styles.postTitle}>
+              {post.title}
+            </Text>
+          ) : null}
+          <Text style={styles.postDescription}>
+            <Text>{post.content}</Text>
+          </Text>
+          <Text style={styles.postFooter}>Last edited: 10-24-2024 Decorah, IA</Text>
+        </View>
+
+        {/* CURRENT Comments Section */}
+        <View style={styles.commentsSection}>
+          <View>
+            <Image source={divideLine} style={styles.divideLine} />
+          </View>
+          {post.allComments && post.allComments.length === 0 ? (
+            <Text style={styles.noCommentsText}>No comment yet.</Text>
+          ) : (
+            post.allComments.map((comment, index) => (
+              <View key={index} style={styles.commentContainer}>
+                <Image
+                  source={require('../assets/project_images/profile_minions.jpg')}
+                  style={styles.commentProfileImage}
+                />
+                <View style={styles.commentContent}>
+                  <Text style={styles.commentText}>
+                    <Text style={styles.commentUsername}>{comment.user_id} </Text>
+                  </Text>
+                  <Text style={styles.commentBody}>{comment.content}</Text>
+                </View>
+              </View>
+            ))
+          )}
+        </View>
+
+        {/* IDEAL Comments Section */}
+        {/*
+        <View style={styles.commentsSection}>
+          <View>
+            <Image source={divideLine} style={styles.divideLine} />
+          </View>
+          <View style={styles.commentContainer}>
+            <Image
+              source={require('../../assets/project_images/profile_minions.jpg')}
+              style={styles.commentProfileImage}
+            />
+            <View style={styles.commentContent}>
+              <View style={styles.commentHeader}>
+                <Text style={styles.commentText}>
+                  <Text style={styles.commentUsername}>Lorem ipsum dolor </Text>
+                  <Text style={styles.authorBadge}>Author</Text>
+                </Text>
+                <View style={styles.likeButton}>
+                  <Image source={likeIcon} style={styles.likeIcon} />
+                  <Text style={styles.likeCount}>1</Text>
+                </View>
+              </View>
+              <Text style={styles.commentBody}>
+                Lorem ipsum dolor sit amet consectetur.
+              </Text>
+              <Text style={styles.commentFooter}>
+                10-24-2024 LocalState, FlyState <Text style={styles.replyText}>Reply</Text>
+              </Text>
+            </View>
+          </View>
+          <View style={styles.replyContainer}>
+            <Image
+              source={require('../../assets/project_images/profile_minions.jpg')}
+              style={styles.replyProfileImage}
+            />
+            <View style={styles.replyContent}>
+              <Text style={styles.commentText}>
+                <Text style={styles.commentUsername}>Lorem ipsum dolor </Text>
+              </Text>
+              <Text style={styles.commentBody}>
+                Lorem ipsum dolor sit amet consectetur.
+              </Text>
+              <Text style={styles.commentFooter}>
+                10-24-2024 LocalState, FlyState <Text style={styles.replyText}>Reply</Text>
+              </Text>
+            </View>
+          </View>
+          <Text style={styles.viewReplies}>- View 11 replies</Text>
+          <View style={styles.commentContainer}>
+            <Image
+              source={require('../../assets/project_images/profile_minions.jpg')}
+              style={styles.commentProfileImage}
+            />
+            <View style={styles.commentContent}>
+              <Text style={styles.commentText}>
+                <Text style={styles.commentUsername}>Lorem ipsum dolor </Text>
+              </Text>
+              <Text style={styles.commentBody}>
+                Lorem ipsum dolor sit amet consectetur.
+              </Text>
+            </View>
+          </View>
+        </View>
+        */}
+      </ScrollView>
+
+      {/* Add Comment and Actions */}
+      <View style={styles.addCommentSection}>
+        <View style={styles.actionsContainer}>
+          <TouchableOpacity style={styles.actionButton}>
+            <Image source={replyIcon} style={styles.actionIcon} />
+            <Text style={styles.actionText}>{post.shares}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.actionButton}>
+            <Image source={likeIcon} style={styles.actionIcon} />
+            <Text style={styles.actionText}>{post.likes}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.actionButton}>
+            <Image source={commentIcon} style={styles.actionIcon} />
+            <Text style={styles.actionText}>{post.commentsCount}</Text>
+          </TouchableOpacity>
+        </View>
         <TextInput
           style={styles.commentInput}
           placeholder="Add a comment..."
-          value={newComment}
-          onChangeText={setNewComment}
+          value={comment}
+          onChangeText={setComment}
+          onSubmitEditing={handlePostComment} // Trigger posting when the user submits the comment
         />
-        <TouchableOpacity style={styles.sendButton} onPress={handleAddComment}>
-          <Ionicons name="send" size={20} color="#FFFFFF" />
-        </TouchableOpacity>
-      </KeyboardAvoidingView>
+      </View>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#EFF3F8' },
-  errorText: { color: '#D32F2F', textAlign: 'center', marginVertical: 10, fontSize: 16 },
-  flatListContent: { paddingBottom: 100 },
-  discussionDetail: {
-    backgroundColor: '#FFFFFF',
-    padding: 20,
-    borderRadius: 15,
-    margin: 20,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 3,
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
   },
-  userRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
-  userImage: { width: 45, height: 45, borderRadius: 22.5, marginRight: 12 },
-  username: { fontSize: 16, fontWeight: '600', color: '#333' },
-  detailTitle: { fontSize: 24, fontWeight: '700', color: '#1D3557', marginBottom: 8 },
-  detailBody: { fontSize: 16, color: '#555', lineHeight: 24 },
-  detailActions: {
-    flexDirection: 'row',
-    marginTop: 15,
-    justifyContent: 'space-around',
-  },
-  actionButton: { flexDirection: 'row', alignItems: 'center' },
-  actionText: { marginLeft: 6, fontSize: 15, fontWeight: '500', color: '#333' },
-  commentsHeader: { fontSize: 20, fontWeight: '700', color: '#1D3557', marginVertical: 15 },
-  commentItem: {
-    backgroundColor: '#FFFFFF',
-    padding: 15,
-    borderRadius: 10,
-    marginHorizontal: 20,
-    marginBottom: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
-  },
-  commentText: { fontSize: 16, color: '#555' },
-  commentDate: { fontSize: 12, color: '#888', marginTop: 4 },
-  commentInputContainer: {
+  postHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    backgroundColor: '#fff',
+    padding: 10,
+  },
+  returnButton: {
+    marginRight: 10,
+  },
+  returnButtonImage: {
+    width: 9,
+    height: 15,
+    resizeMode: 'contain',
+  },
+  profileImage: {
+    width: 34,
+    height: 34,
+    borderRadius: 25,
+  },
+  headerTextContainer: {
+    marginLeft: 10,
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  username: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  followButton: {
+    backgroundColor: '#50C2C9',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+  },
+  followText: {
+    color: '#fff',
+    fontSize: 14,
+  },
+  postImage: {
+    width: '100%',
+    height: 200,
+    marginVertical: 10,
+  },
+  postTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginHorizontal: 10,
+  },
+  postDescription: {
+    fontSize: 14,
+    marginHorizontal: 10,
+    marginVertical: 5,
+  },
+  tags: {
+    fontSize: 14,
+    color: '#50C2C9',
+    marginHorizontal: 10,
+    marginVertical: 5,
+  },
+  postFooter: {
+    fontSize: 12,
+    color: '#888',
+    marginHorizontal: 10,
+    marginVertical: 5,
+  },
+  commentsSection: {
+    marginHorizontal: 10,
+    marginVertical: 10,
+  },
+  commentText: {
+    fontSize: 14,
+    marginVertical: 5,
+  },
+  authorText: {
+    fontWeight: 'bold',
+    color: '#50C2C9',
+  },
+  commentReply: {
+    fontSize: 12,
+    color: '#50C2C9',
+    marginVertical: 5,
+  },
+  addCommentSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 10,
+    marginVertical: 10,
   },
   commentInput: {
     flex: 1,
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
+    backgroundColor: '#f0f0f0',
     borderRadius: 20,
     paddingHorizontal: 15,
-    marginRight: 10,
+    paddingVertical: 10,
   },
-  sendButton: { backgroundColor: '#50C2C9', padding: 10, borderRadius: 20 },
+  divideLine: {
+    width: 345,
+    height: 1,
+    marginTop: 4,
+    // marginBottom: 4
+  },
+  commentContainer: {
+    flexDirection: 'row',
+    marginVertical: 10,
+  },
+  commentProfileImage: {
+    width: 34,
+    height: 34,
+    borderRadius: 20,
+  },
+  commentContent: {
+    marginLeft: 10,
+    flex: 1,
+  },
+  commentUsername: {
+    fontWeight: 'bold',
+  },
+  commentBody: {
+    fontSize: 14,
+    color: '#333',
+  },
+  commentFooter: {
+    fontSize: 12,
+    color: '#888',
+    marginTop: 5,
+  },
+  replyText: {
+    color: '#50C2C9',
+    fontWeight: 'bold',
+  },
+  replyContainer: {
+    flexDirection: 'row',
+    marginLeft: 50,
+    marginVertical: 10,
+  },
+  replyProfileImage: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+  },
+  replyContent: {
+    marginLeft: 10,
+    flex: 1,
+  },
+  viewReplies: {
+    color: '#50C2C9',
+    fontSize: 12,
+    marginLeft: 50,
+    marginVertical: 5,
+  },
+  actionsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 15,
+  },
+  actionIcon: {
+    width: 20,
+    height: 20,
+    resizeMode: 'contain',
+  },
+  actionText: {
+    marginLeft: 5,
+    fontSize: 14,
+    color: '#000',
+  },
+  authorBadge: {
+    backgroundColor: '#50C2C9',
+    color: '#fff',
+    fontSize: 12,
+    paddingHorizontal: 5,
+    borderRadius: 5, // Increased borderRadius for rounder corners
+    marginLeft: 5,
+  },
+  commentHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  likeButton: {
+    alignItems: 'center', // Center the icon and count
+    justifyContent: 'center',
+  },
+  likeIcon: {
+    width: 16,
+    height: 16,
+    resizeMode: 'contain',
+    marginBottom: 2, // Add spacing between the icon and the count
+  },
+  likeCount: {
+    fontSize: 12,
+    color: '#333',
+    textAlign: 'center',
+  },
+  noCommentsText: {
+    fontSize: 14,
+    color: '#888',
+    marginVertical: 10,
+    textAlign: 'center', // Center the text horizontally
+  },
+  
 });
 
-export default DiscussionDetail;
-
-
-
-
-
-
-  
-    
-
-      
+export default Content;
