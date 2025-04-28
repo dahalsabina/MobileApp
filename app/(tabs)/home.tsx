@@ -124,6 +124,7 @@ const home = () => {
 
   const handleComment = async (postId: string) => {
     // Similar logic for comments
+    
   };
 
   const handleShare = async (postId: string) => {
@@ -190,6 +191,7 @@ const home = () => {
             shares={post.shares}
             onLike={() => handleLike(post.id)}
             onComment={() => handleComment(post.id)}
+            // onComment={() => handleComment(post.id)}
             onShare={() => handleShare(post.id)}
             onPress={() => navigation.navigate('content', { post })}
           />
