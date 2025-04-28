@@ -7,6 +7,7 @@ import divideLine from '../assets/project_images/line.png';
 
 interface PostCardProps {
   username?: string;
+  title?: string;
   content?: string;
   imageSource?: string;
   profileImageSource?: string;
@@ -21,6 +22,7 @@ interface PostCardProps {
 
 export function PostCardCompo({
   username,
+  title,
   content,
   imageSource,
   likes,
@@ -41,6 +43,9 @@ export function PostCardCompo({
         </View>
         <Text style={styles.username}>{username}</Text>
       </View>
+      <TouchableOpacity onPress={onPress}>
+        <Text style={styles.title}>{title}</Text>
+      </TouchableOpacity>
       <TouchableOpacity onPress={onPress}>
         <Text style={styles.content}>{content}</Text>
       </TouchableOpacity>
@@ -103,6 +108,12 @@ const styles = StyleSheet.create({
   },
   username: {
     fontWeight: 'bold',
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 4,
+    marginLeft: 4.5,
   },
   content: {
     marginBottom: 8,

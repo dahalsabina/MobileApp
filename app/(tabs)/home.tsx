@@ -134,6 +134,7 @@ const home = () => {
   const posts: Post[] = discussions.map((discussion) => ({
     id: discussion.id,
     username: discussion.user_id, // default using user_id
+    title: discussion.title,
     content: discussion.body,
     image: '', // default
     shares: 0, 
@@ -181,6 +182,7 @@ const home = () => {
         {posts.map((post) => (
           <PostCardCompo
             username={post.username}
+            title={post.title}
             content={post.content}
             imageSource={
               post.image.startsWith('http')
